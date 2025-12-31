@@ -87,5 +87,90 @@ The backend now has a structured, scalable response and error-handling system al
 i am going to push user and video model
 
 
+## 7:14 pm
+## 📅 30 December 2025  
+⏰ Time: 02:15 AM IST  
+🎯 Milestone: Media Upload Pipeline Implemented (Multer + Cloudinary)
+
+### What was implemented
+A complete media upload system was added to the backend using **Multer** for temporary file storage and **Cloudinary** for permanent cloud storage of images and videos.
+
+This allows the application to safely accept user-uploaded files, process them on the server, and store them in a scalable cloud-based media service.
+
+---
+
+### Components added
+
+#### 1. Multer Disk Storage
+Files are temporarily stored inside:
+
+
+Multer handles:
+- Multipart form data
+- File naming
+- Temporary disk storage before upload
+
+Each file is assigned a unique timestamp-based name to avoid overwriting.
+
+---
+
+#### 2. Cloudinary Upload Utility
+A reusable Cloudinary upload function was created to:
+
+- Accept a local file path
+- Upload the file to Cloudinary
+- Automatically detect image or video type
+- Delete the local file after successful upload
+
+This ensures the backend does not accumulate unnecessary files on disk.
+
+---
+
+### Architecture Flow
+
+Client Upload
+↓
+Multer (public/temp)
+↓
+Cloudinary (Cloud Storage)
+↓
+Local file deleted
+↓
+Cloud URL returned
+
+
+This is the standard pattern used in production-grade backend systems.
+
+---
+
+### Why this matters
+This implementation provides:
+- Scalable media storage
+- Secure file handling
+- Support for both images and videos
+- Clean separation between temporary and permanent storage
+
+It prepares the backend for:
+- User profile images
+- Post media
+- AI image processing
+- Video uploads
+
+---
+
+### Files involved
+middlewares/multer.js
+utils/cloudinary.js
+
+
+---
+
+### Result
+The backend now has a fully functional, cloud-based media upload system integrated with its architecture.
+
+This is a critical building block for all user-generated content features.
+
+
+
 
 
