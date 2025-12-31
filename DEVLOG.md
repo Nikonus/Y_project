@@ -43,3 +43,45 @@ Fixed .env formatting (no spaces)
 Encoded password using %40
 
 Used import "dotenv/config" for ES Modules
+
+
+## 📅 30 December 2025  
+⏰ Time: 02:15 AM IST  
+🎯 Milestone: API Utility Layer Implemented
+
+### What was implemented
+A core utility layer was added to standardize how the backend handles API responses and errors. This includes:
+
+- A custom `Apierr` class for structured API errors  
+- A `Apiresponse` class for consistent success responses  
+- An `asyncHandler` middleware to eliminate repetitive try/catch blocks in controllers  
+
+### Purpose
+These utilities ensure that all API responses follow a predictable and professional format. They also centralize error handling, making the backend more stable, readable, and production-ready.
+
+### Files added
+utils/Apierr.js
+utils/Apiresponse.js
+utils/asyncHandler.js
+
+
+
+### Architecture improvement
+Controllers will now:
+- Throw `Apierr` for failures
+- Return `Apiresponse` for success
+- Be wrapped with `asyncHandler` to catch async errors automatically
+
+This establishes a clean API contract for all future routes.
+
+### Result
+The backend now has a structured, scalable response and error-handling system aligned with professional backend engineering practices.
+
+### What this enables next
+- User authentication routes
+- Protected APIs
+- Centralized error middleware
+
+
+
+
