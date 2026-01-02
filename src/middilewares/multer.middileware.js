@@ -3,6 +3,7 @@ import path from "path";
 
 // Configure disk storage
 const storage = multer.diskStorage({
+ 
 
   // Where files will be stored temporarily
   destination: function (req, file, cb) {
@@ -20,6 +21,9 @@ const storage = multer.diskStorage({
     cb(null, uniqueName);
   }
 });
+
+
+
 
 // Export multer middleware
 export const upload = multer({ storage });
