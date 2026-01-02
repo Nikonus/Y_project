@@ -1,5 +1,5 @@
 import mongoose,{ Schema } from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 
 
@@ -11,7 +11,7 @@ const userSchema = new Schema({
     coverImage: { type: String , required: false },
     watchhistory: { type: mongoose.Types.ObjectId, ref: "Video" },
     password: { type: String, required: [true, "Password is required"], unique: true },
-    refresgenToken: { type: String },
+    refresToken: { type: String },
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
