@@ -6,14 +6,17 @@ import uploadOnCloudinary from "../utils/cloudinary.js"
 import Apiresponse from "../utils/apires.js";
 
 const registerUser= asyncHandler(async(req, res)=>{
+  
 
+// console.log(req.files)
 
 
     const{fullname,username,password,email}=req.body
-    console.log("email", email)
-    console.log("password",password)
-    console.log("username",username)
-    console.log("fullname", fullname)
+//     console.log("email", email)
+//     console.log("password",password)
+//     console.log("username",username)
+//     console.log("fullname", fullname)
+
 
     if(
         [fullname,username,password,email].some((field)=>field?.trim()==="")
@@ -34,7 +37,13 @@ const registerUser= asyncHandler(async(req, res)=>{
     }
 
     const avatarLocalpath = req.files?.avatar[0]?.path;
-    const coverImageLocalpath = req.files?.coverImage?.[0]?.path;
+    // const coverImageLocalpath = req.files?.coverImage?.[0]?.path;
+    let coverImageLocalpath;
+    if(req.files&&Array.isArray(req.files.coverImage)&&req.files.coverImage.length>0){
+        coverImageLocalpath=req.files.coverImage[0].path;
+    }
+
+
 
 
     if(!avatarLocalpath){
@@ -50,8 +59,9 @@ const registerUser= asyncHandler(async(req, res)=>{
 
    const user= await User.create({
         fullname,
+        email,
         avatar:avatar.url,
-        coverImage:coverImage?.url,
+        coverImage:coverImage?.url||"",
         username:username.toLowerCase(),
         password
 
@@ -66,6 +76,9 @@ const registerUser= asyncHandler(async(req, res)=>{
     return res.status(201).json(
         new Apiresponse(200, createUser, "User sccussfully registerd ")
     )
+
+    // console.log(req.files)
+    // console.log(req.body)
 
 
 
