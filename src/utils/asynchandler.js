@@ -1,26 +1,25 @@
-// asyncHandler wraps async route handlers
-// so that try/catch is not required in every controller
-const asyncHandler = (fn) => async (req, res, next) => {
-    try {
-        // Execute the controller function
-        await fn(req, res, next);
-    } catch (error) {
-        // Send structured error response
-        res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message || "Internal Server Error"
-        });
-    }
+const asyncHandler = (requestHandler) => {
+  return (req, res, next) => {
+    Promise.resolve(requestHandler(req, res, next)).catch(next);
+  };
 };
 
-export { asyncHandler};
+export { asyncHandler };
 
 
 
+// const asyncHandler = () => {}
+// const asyncHandler = (func) => () => {}
+// const asyncHandler = (func) => async () => {}
 
 
-            
-
-            
-            
-            
+// const asyncHandler = (fn) => async (req, res, next) => {
+//     try {
+//         await fn(req, res, next)
+//     } catch (error) {
+//         res.status(err.code || 500).json({
+//             success: false,
+//             message: err.message
+//         })
+//     }
+// }
