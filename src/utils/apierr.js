@@ -39,4 +39,4 @@ class Apierr extends Error {
 }
 
 // Export so it can be used in controllers and middleware
-export default Apierr;
+export {Apierr};
