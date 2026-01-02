@@ -172,5 +172,67 @@ This is a critical building block for all user-generated content features.
 
 
 
+### 
+1 January 2026, 10:00 PM
+
+Task: API connectivity and routing validation using Postman
+
+Today I completed the first end-to-end validation of the backend routing layer by integrating the user router, controller, and app.js entry point and testing the API flow through Postman.
+
+I created and wired the following components:
+
+user.routes.js to define route paths and HTTP methods
+
+user.controller.js to handle business logic and responses
+
+app.js to register middleware and mount the user router under /api/v1/users
+
+After connecting these layers, I used Postman as a client simulator to send HTTP requests to the API. This allowed me to verify that:
+
+The router was correctly mounted
+
+Requests were reaching the correct controller
+
+Express middleware (JSON parser, CORS, cookies) was functioning
+
+The server was returning the expected JSON response
+
+Postman was used to simulate real client behavior by sending requests directly to the backend without a frontend. This confirmed that the backend request pipeline — from URL → Router → Controller → Response — is working correctly.
+
+This step ensures that the foundation of the API is stable before adding authentication, database integration, or frontend communication.
+
+Status: Backend routing layer successfully verified using Postman.
+
+
+
+ 2 January 2026, 11:14 AM
+
+Task: Completion of user registration system with file upload and Cloudinary integration
+
+Today the user registration module of the backend was fully implemented and validated. The registration flow now handles complete user onboarding, including input validation, duplicate account prevention, media upload, and secure database persistence.
+
+The controller now performs the following operations in sequence:
+
+Validates required fields (fullname, username, email, password)
+
+Verifies email format using regex validation
+
+Checks MongoDB for existing users with the same username or email
+
+Validates the presence of an avatar file via Multer
+
+Uploads avatar and optional cover image to Cloudinary
+
+Stores Cloudinary URLs along with user details in MongoDB
+
+Excludes sensitive fields (password and refresh token) from API responses
+
+Returns a structured success response using a standardized API response format
+
+This establishes a production-grade registration pipeline using Express, MongoDB (Mongoose), Multer, and Cloudinary, confirming that the backend can now safely accept, process, and store new user accounts.
+
+Status: User registration feature successfully completed and operational.
+
+
 
 
