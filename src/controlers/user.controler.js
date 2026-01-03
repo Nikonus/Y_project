@@ -6,19 +6,31 @@ import uploadOnCloudinary from "../utils/cloudinary.js"
 import Apiresponse from "../utils/apires.js";
 
 
-const generateAccessTokenandRefreshToken= async(userId)=>{
+const generateAccessTokenandRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId);
-        const accessToken = user.generateAccessToken();
-        const refreshToken = user.generateRefreshToken();
-        user.refresToken = refreshToken;
-        await user.save({validateBeforeSave: false});  
+
         
-        return {accessToken, refreshToken};
+
+        const accessToken = user.generateAccessToken();
+      
+
+        const refreshToken = user.generateRefreshToken();
+        
+
+        user.refreshToken = refreshToken;
+
+        await user.save({ validateBeforeSave: false });
+        
+
+        return { accessToken, refreshToken };
+
     } catch (error) {
-      throw new Apierr(500,"something went wrong while generating token");  
+        
+        throw new Apierr(500, error.message);
     }
-}
+};
+
     
 const registerUser= asyncHandler(async(req, res)=>{
   
@@ -121,7 +133,8 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     // Compare entered password with hashed password stored in DB
-    const isPasswordMatched = await user.comparePassword(password)
+    const isPasswordMatched = await user.ispasswordmatched(password)
+
 
     // If password is incorrect, throw error
     if (!isPasswordMatched) {
