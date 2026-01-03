@@ -410,3 +410,76 @@ Status
 
 User Registration with File Upload + Cloudinary + MongoDB is now fully functional and production-grade.
 
+
+### 03 January 2026 — 12:20 PM
+Authentication & Logout System Implemented
+
+Today we successfully completed the core authentication layer for the backend of Y_PROJECT. This marks a major milestone because the system now supports secure user login, session management, and controlled logout using industry-standard JWT and cookie-based security.
+
+What was completed
+
+1. Login System
+
+Implemented user login using email or username + password.
+
+Added secure password comparison using the model method.
+
+On successful login:
+
+Generated Access Token (short-lived).
+
+Generated Refresh Token (long-lived).
+
+Stored refresh token in the database.
+
+Sent both tokens as HTTP-only, secure cookies.
+
+2. JWT Authentication Middleware
+
+Built verifyJWT middleware to:
+
+Read tokens from cookies or Authorization header.
+
+Validate JWT signature and expiry.
+
+Load the authenticated user from MongoDB.
+
+Attach req.user for protected routes.
+
+3. Protected Logout System
+
+Logout route is now protected by JWT middleware.
+
+On logout:
+
+Refresh token is removed from database.
+
+Access and refresh token cookies are cleared.
+
+User session is invalidated.
+
+4. Secure Cookie-Based Auth
+
+Implemented httpOnly and secure cookies for:
+
+Protection from XSS attacks.
+
+Safer token storage compared to localStorage.
+
+Current Status
+
+Authentication flow is now fully wired and functional at backend level.
+All core login, token, middleware, and logout logic has been implemented.
+
+Next Pending Task
+
+End-to-end testing using:
+
+Postman / Thunder Client
+
+Cookie behavior
+
+Token expiry & refresh flows
+
+Protected route validation
+
