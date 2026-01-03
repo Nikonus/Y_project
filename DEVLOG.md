@@ -483,3 +483,159 @@ Token expiry & refresh flows
 
 Protected route validation
 
+
+DEVLOG — Authentication System Debugging & Stabilization
+
+Date: 03 Jan 2026
+Time Completed: 10:18 PM
+
+Overview
+
+This session focused on stabilizing the authentication system for Y_PROJECT.
+The system initially failed during login, token generation, and refresh-token storage due to multiple schema, middleware, and configuration defects.
+All issues have now been identified, corrected, and verified.
+
+The system now supports:
+
+Login using username + password
+
+Login using email + password
+
+Secure access token and refresh token issuance
+
+Cookie-based session handling
+
+Errors Encountered & How They Were Fixed
+1. Password Was Being Re-Hashed on Every Save
+
+Problem
+The password hashing middleware was incorrectly implemented.
+Whenever refreshToken was updated, the password was being hashed again, corrupting it.
+
+This caused:
+
+Valid passwords to stop matching
+
+invalid credentials even when correct password was used
+
+Root Cause
+The pre("save") middleware was missing the password-change check or had incorrect control flow.
+
+Fix
+
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+
+This ensures:
+
+Password hashes only once
+
+Refresh token updates do not touch the password
+
+2. next is not a function During Login
+
+Problem
+Login crashed when saving refresh tokens.
+
+Root Cause
+Mongoose was using promise-based middleware (async function), but the schema was written using callback-based next().
+In Mongoose 6+, async middleware does NOT receive next.
+
+Calling next() caused:
+
+Error: next is not a function
+
+
+Fix
+Removed all usage of next() from pre("save") and used promise style only.
+
+3. Refresh Token Was Using Access Token Secret
+
+Problem
+Refresh tokens were being signed using:
+
+ACCESS_TOKEN_SECRET
+
+ACCESS_TOKEN_EXPIRY
+
+This broke token rotation and caused JWT failures.
+
+Fix
+
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    { _id: this._id },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+  );
+};
+
+4. Environment Variables Were Incorrect
+
+Problem
+.env contained:
+
+REFRESH_TOKEN_EXPIRY=longRandomString
+REFRESH_TOKEN_EXPIRY=10D
+
+
+There was no REFRESH_TOKEN_SECRET.
+
+JWT signing failed because the secret was undefined.
+
+Fix
+Corrected environment variables:
+
+REFRESH_TOKEN_SECRET=<secure random string>
+REFRESH_TOKEN_EXPIRY=10d
+
+5. Password Field Was Marked as unique
+
+Problem
+Passwords were defined as unique: true.
+Since bcrypt can generate identical hashes, MongoDB rejected saves when refresh tokens were written.
+
+Fix
+Removed unique: true from password field and deleted the index from MongoDB.
+
+6. Incorrect Method Name
+
+Problem
+Controller was calling:
+
+user.comparePassword()
+
+
+But schema defined:
+
+ispasswordmatched()
+
+
+Fix
+Updated controller to:
+
+user.ispasswordmatched(password)
+
+Final System Status
+
+As of 10:18 PM, the authentication system is fully operational.
+
+The system now supports:
+
+Login via username + password
+
+Login via email + password
+
+Secure cookie-based sessions
+
+Stable refresh token storage
+
+No password corruption
+
+No JWT signing errors
+
+No middleware crashes
+
