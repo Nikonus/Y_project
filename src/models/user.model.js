@@ -10,17 +10,18 @@ const userSchema = new Schema({
     avatar: { type: String , required: true},
     coverImage: { type: String , required: false },
     watchhistory: { type: mongoose.Types.ObjectId, ref: "Video" },
-    password: { type: String, required: [true, "Password is required"], unique: true },
-    refresToken: { type: String },
+    password: { type: String, required: [true, "Password is required"]},
+    refreshToken: { type: String },
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
-  
 });
+
+
+
 
 
 
@@ -44,19 +45,12 @@ userSchema.methods.generateAccessToken= function(){
         }
        )
 }
-userSchema.methods.generateRefreshToken= function(){
-       return jwt.sign(
-        {
-            _id:this._id,
-            email:this.email,
-            username:this.username,
-            fullname:this.fullname
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn:process.env.ACCESS_TOKEN_EXPIRY,
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    { _id: this._id },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+  );
+};
 
-        }
-       )
-}
 export const User = mongoose.model("User", userSchema);
