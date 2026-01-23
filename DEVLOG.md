@@ -639,3 +639,58 @@ No JWT signing errors
 
 No middleware crashes
 
+Date: Friday, January 23, 2026
+Time: 11:09 AM
+
+Summary
+
+Implemented a refresh token mechanism to securely regenerate access tokens when they expire, improving session continuity and user experience without forcing re-login.
+
+Work Completed
+
+Added refresh access token controller logic in user.controller.js.
+
+Implemented JWT-based verification using REFRESH_TOKEN_SECRET.
+
+Retrieved refresh token from HTTP-only cookies or request body.
+
+Validated refresh token against:
+
+JWT signature
+
+User existence in database
+
+Token match with stored refresh token (token rotation safety).
+
+Generated new access token and refresh token using a centralized utility function.
+
+Sent refreshed tokens back via secure, HTTP-only cookies.
+
+Handled edge cases:
+
+Missing refresh token
+
+Invalid or expired token
+
+Token mismatch (possible reuse or logout scenario).
+
+Ensured proper HTTP status codes and structured API responses.
+
+Security Considerations
+
+Used HTTP-only cookies to prevent XSS access.
+
+Enabled secure and sameSite: "strict" flags for CSRF protection.
+
+Implemented refresh token validation against database to prevent token reuse.
+
+Files Modified
+
+src/controllers/user.controller.js
+
+Outcome
+
+Users can now continue using the platform seamlessly after access token expiration.
+
+Authentication flow is more secure, scalable, and production-ready.
+
