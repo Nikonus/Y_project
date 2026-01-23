@@ -1,171 +1,152 @@
 <div align="center">
-
-# 🚀 **Y_PROJECT**
-### 🔐 *Production-Grade Backend with JWT, Cookies & Cloudinary*
+🚀 Y_PROJECT
+🔐 Production-Grade Backend with JWT, Secure Cookies & Cloudinary
 
 Secure • Scalable • API-First • Real-World Architecture
 
----
+<img src="https://img.shields.io/badge/Backend-Node.js-green?style=for-the-badge&logo=node.js" /> <img src="https://img.shields.io/badge/Framework-Express-black?style=for-the-badge&logo=express" /> <img src="https://img.shields.io/badge/Database-MongoDB-darkgreen?style=for-the-badge&logo=mongodb" /> <br/> <img src="https://img.shields.io/badge/Auth-JWT-orange?style=for-the-badge" /> <img src="https://img.shields.io/badge/Security-HTTP%20Only%20Cookies-blue?style=for-the-badge" /> <img src="https://img.shields.io/badge/Storage-Cloudinary-purple?style=for-the-badge" /> </div>
 
-<!-- Badges -->
-<img src="https://img.shields.io/badge/Backend-Node.js-green?style=for-the-badge&logo=node.js" />
-<img src="https://img.shields.io/badge/Framework-Express-black?style=for-the-badge&logo=express" />
-<img src="https://img.shields.io/badge/Database-MongoDB-darkgreen?style=for-the-badge&logo=mongodb" />
-<br/>
-<img src="https://img.shields.io/badge/Auth-JWT-orange?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Security-HTTP%20Only%20Cookies-blue?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Storage-Cloudinary-purple?style=for-the-badge" />
 
----
+✨ Overview
 
-# ✨ Overview
-</div>
+Y_PROJECT is a production-oriented backend system built using Node.js, Express, MongoDB, and JWT-based authentication.
 
-**Y_PROJECT** is a **real-world backend system** built with **Node.js, Express, MongoDB, and JWT-based authentication**.
+The goal of this project is to replicate real SaaS backend architecture, focusing on security, scalability, and maintainability, rather than tutorial-level implementations.
 
-It is designed to behave like a **production SaaS backend**, supporting:
+It supports:
 
-- 🔑 Secure login & logout  
-- 🔄 Access & Refresh token system  
-- 🍪 HTTP-only cookie-based sessions  
-- 🖼️ Image uploads using Cloudinary  
-- 🛡️ Protected APIs using middleware  
+🔑 Secure user authentication
 
-This is **not a tutorial backend** — it follows the same architecture used by **Netflix, GitHub, and Stripe**.
+🔄 Access & Refresh token lifecycle
 
----
+🍪 HTTP-only cookie-based sessions
 
-# 📂 Folder Structure
+🖼️ Media uploads via Cloudinary
 
+🛡️ Protected APIs with middleware
+
+This project follows patterns used in real-world systems, similar to those used by large-scale platforms.
+
+
+📂 Folder Structure
 Y_PROJECT/
 │
 ├── src/
-│ ├── controllers/ # Auth logic (register, login, logout)
-│ ├── routes/ # API endpoints
-│ ├── middlewares/ # JWT auth, multer, security
-│ ├── models/ # MongoDB schemas
-│ ├── utils/ # Cloudinary, tokens, async handler
-│ ├── db/ # MongoDB connection
-│ ├── app.js # Express app setup
-│ └── index.js # Server entry point
+│   ├── controllers/     # Business logic (auth, user, profile)
+│   ├── routes/          # API route definitions
+│   ├── middlewares/     # Auth, multer, security middlewares
+│   ├── models/          # MongoDB schemas
+│   ├── utils/           # Cloudinary, tokens, async handlers
+│   ├── db/              # Database connection
+│   ├── app.js           # Express app configuration
+│   └── index.js         # Server entry point
 │
-└── public/temp # Temporary file uploads
+└── public/temp          # Temporary upload storage
 
+Why this structure?
 
+ Clear separation of concerns
 
-This structure allows:
-- Clean separation of logic  
-- Easy scaling  
-- Team collaboration  
+ Easy to scale and maintain
 
----
+ Suitable for team-based development
 
-# 🔐 Authentication System
+ 🔐 Authentication System
 
-Y_PROJECT uses **dual-token authentication**:
+Y_PROJECT implements a dual-token authentication strategy.
 
-| Token | Purpose |
-|------|--------|
-| **Access Token** | Used on every API request (short-lived) |
-| **Refresh Token** | Used to generate new access tokens (long-lived) |
+Token	Purpose
+Access Token	Used on every protected API request (short-lived)
+Refresh Token	Used to issue new access tokens (long-lived)
+Token Storage
 
-Both tokens are stored in **secure HTTP-only cookies**, which protects them from:
-- JavaScript access
-- XSS attacks
-- Token theft
+Stored in HTTP-only secure cookies
 
----
+Not accessible via JavaScript
 
-# 🔄 Auth Flow
+Resistant to XSS and token theft
 
-### 🟢 Login
-1. User sends email or username + password  
-2. Server validates credentials  
-3. Server creates:
-   - Access Token  
-   - Refresh Token  
-4. Both are stored in **secure cookies**
+🔄 Authentication Flow
+🟢 Login
 
-### 🔵 Protected Request
-1. Browser automatically sends cookies  
-2. JWT middleware verifies the token  
-3. User is attached to `req.user`  
-4. API returns protected data  
+User submits email/username and password
 
-### 🔴 Logout
-1. User calls `/logout`  
-2. JWT middleware verifies user  
-3. Refresh token is removed from DB  
-4. Cookies are cleared  
-5. Session ends  
+Server validates credentials
 
----
+Generates access & refresh tokens
 
-# 🛡️ Security Features
+Stores both tokens in secure cookies
 
-- Password hashing  
-- JWT signature verification  
-- Token expiry handling  
-- Refresh token rotation  
-- HTTP-only secure cookies  
-- MongoDB-stored refresh tokens  
+🔵 Protected Requests
 
-This is how **real production backends** handle authentication.
+Browser automatically sends cookies
 
----
+JWT middleware validates access token
 
-# 📤 File Upload System
+User data is attached to req.user
 
-Y_PROJECT supports:
-- Avatar upload  
-- Cover image upload  
+Protected resource is returned
 
-Flow:
-1. Multer receives file  
-2. File is uploaded to Cloudinary  
-3. Local file is deleted  
-4. Cloudinary URL is stored in MongoDB  
+🔴 Logout
 
-This keeps the backend:
-- Fast  
-- Scalable  
-- Storage-efficient  
+User hits logout endpoint
 
----
+Refresh token is removed from database
 
-# 🌐 API Endpoints
+Cookies are cleared
 
-| Method | Route | Description |
-|-------|------|-------------|
-| POST | `/api/v1/users/register` | Register new user |
-| POST | `/api/v1/users/login` | Login & receive tokens |
-| POST | `/api/v1/users/logout` | Logout (JWT protected) |
+Session is fully terminated
 
----
+🛡️ Security Features
 
-# 🧪 Current Status
+Password hashing
 
-| Feature | Status |
-|-------|--------|
-User Registration | ✅ Done  
-Login with JWT | ✅ Done  
-Secure Cookies | ✅ Done  
-JWT Middleware | ✅ Done  
-Logout | ✅ Done  
-Token Refresh | ⏳ Testing Pending  
+JWT signature verification
 
----
+Token expiry handling
 
-# 👨‍💻 Developer
+Refresh token rotation
 
-**Nikhil Dubey**  
-Backend Developer  
-Building production-grade systems step by step 🚀
+HTTP-only secure cookies
 
----
+Refresh tokens stored in MongoDB
+
+These practices reflect real production security standards.
+
+📤 File Upload System
+
+Supported uploads:
+
+User avatar
+
+User cover image
+
+Upload Flow
+
+Multer processes incoming file
+
+File is uploaded to Cloudinary
+
+Temporary local file is removed
+
+Cloudinary URL is stored in MongoDB
+
+Benefits:
+
+Reduced server storage load
+
+Faster media delivery
+
+Scalable file handling
+
+👨‍💻 Developer
+
+Nikhil Dubey
+Backend Developer
+
+Focused on building secure, scalable, production-grade systems step by step.
+
 
 <div align="center">
-
-### ⭐ If you like this project, star the repo and follow its progress!
-
+⭐ If you find this project useful, consider starring the repository
 </div>
