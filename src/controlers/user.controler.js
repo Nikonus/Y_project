@@ -212,16 +212,16 @@ const logoutUser = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken =  req.cookies.refreshAccessToken || req.body.refreshAccessToken
 
-    if(incomingRefreshToken?.trim()===""){
+    if(!incomingRefreshToken){
         throw new Apierr(401,"unauthorized request, no token found")
     }
     try {
-        const decodedToken=  jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET, async(err, decoded)=>{
-            if(err){
-                throw new Apierr(401,"your session is expired, please login again")
-            }
+        const decodedToken=  jwt.verify(
+            incomingRefreshToken,
+             process.env.REFRESH_TOKEN_SECRET
+            )
     
-    }) 
+    
     const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
     
     if(!user){
@@ -244,7 +244,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
      .status(200)
      .cookie("refreshToken", newRefreshToken, options) // set refresh token in cookie
      .cookie("accessToken", accessToken, options)   // set access token in cookie
-     json(
+     .json(
          new Apiresponse(
              200,
                 {accessToken, refreshToken : newRefreshToken},
@@ -260,10 +260,213 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 })
 
+const changecurrentuserpassword = asyncHandler(async (req, res) => {
+
+    const { oldpassword, newpassword } = req.body
+
+    const user = await User.findById(req.user._id)
+    const isPasswordMatched = await user.ispasswordmatched(oldpassword)
+
+    if (!isPasswordMatched) {
+        throw new Apierr(400, "old password is incorrect")
+    }
+
+    user.password = newpassword
+
+    await user.save({ validateBeforeSave: false })
+
+    return res
+        .status(200)
+        .json(
+            new Apiresponse(
+                200,
+                null,
+                "Password successfully changed"
+            )
+        )
+});
+
+const getCurrentuser = asyncHandler(async (req, res) => {
+    return res
+        .status(200)
+        .json(
+            new Apiresponse(
+                200,
+                req.user,
+                "Current user fetched successfully"
+            )
+        )
+});
+
+const updatrAccountDetails = asyncHandler(async (req, res) => {
+    const { fullname, email } = req.body;
+    if(!fullname||!email){
+        throw new Apierr(400,"fullname and email are required") 
+    }
+
+
+const user = User.findByIdAndUpdate(req.user._id,{
+    $set:{
+        fullname,
+        email  
+     }
+},{ new:true}).select("-password -refreshToken")
+
+if(!user){
+    throw new Apierr(500,"something went wrong while updating user profile")
+};
+return res.status(200).json(
+    new Apiresponse(200,user,"user profile successfully updated")
+);
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+    const avatarLocalpath = req.file?.path; 
+    if (!avatarLocalpath) { 
+        throw new Apierr(400, "avatar is required");
+    }   
+    const avatar = await uploadOnCloudinary(avatarLocalpath);
+    if (!avatar.url) {
+        throw new Apierr(500, "something went wrong while uploading avatar");
+    } 
+    
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                avatar: avatar.url,
+            },
+        },
+        { new: true }
+    ).select("-password -refreshToken");
+    return res.status(200).json(
+        new Apiresponse(200, user, "avatar successfully updated")
+    );  
+
+
+            
+}
+)
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+    const coverImageLocalpath = req.file?.path; 
+    if (!coverImageLocalpath) { 
+        throw new Apierr(400, "cover image is required");
+    }   
+    const coverImage = await uploadOnCloudinary(coverImageLocalpath);
+    if (!coverImage.url) {
+        throw new Apierr(500, "something went wrong while uploading cover image");
+    } 
+    
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                coverImage: coverImage.url,
+            },
+        },
+        { new: true }
+    ).select("-password -refreshToken");
+
+    return res.status(200).json(
+        new Apiresponse(200, user, "cover image successfully updated")
+    );
+
+
+            
+}
+)
+const getUserChannalProfile = asyncHandler(async(req,res)=>{
+
+    const {username}= req.params;
+    if(!username?.trim()){
+        throw new Apierr(400,"username is missing")
+    }
+
+    const channal = await User.aggregate([
+        {
+            $match:{
+                username:username?.toLowerCase()
+            }
+        }
+        ,{
+            $lookup:{
+                from:"Subscription",
+                foreignField:"channal",
+                localField:"_id",
+                as:"subscribers"
+            }
+        },
+        {
+           $lookup:{
+                from:"Subscription",
+                foreignField:"channal",
+                localField:"_id",
+                as:"subscribersTo"
+            }  
+        },
+
+        {
+           $addFields:{
+            subscribersCount:{$size:"$subscribers"}
+           },
+           channalsubscribedtoCount:{
+             $size:$subscribedTo
+        },
+        isSubscribed:{
+            $cond:{
+               if:{$in:[req.user._id,"$subscribers.subscriber"]},
+               then:true,
+               else:false
+            }
+        }
+        },
+        {
+            $project:{
+                fullname:1, 
+                username:1,
+                email:1,
+                avatar:1,
+                subscribersCount:1,
+                channalsubscribedtoCount:1,
+                isSubscribed:1,
+            }
+        }
+    ])
+
+    if(!channal||channal.length){
+        throw new Apierr(404,"channal not found")
+    }
+console.log("channal", channal)
+
+    return res.status(200).json(
+        new Apiresponse(200,channal[0],"channal profile fetched successfully")
+    )
+})
+
+
+const userHistory= asyncHandler(async(req,res)=>{   
+
+})
+
+
+
+
+
+
+    
+
 
 
 export { registerUser
-        ,loginUser,
-        logoutUser
-        ,refreshAccessToken,
+        ,loginUser
+        ,logoutUser
+        ,refreshAccessToken
+        ,changecurrentuserpassword
+        ,updatrAccountDetails
+        ,updateUserAvatar
+        ,updateUserCoverImage
+        ,getUserChannalProfile
+        ,getCurrentuser
+        
     }    
