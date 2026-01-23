@@ -4,6 +4,7 @@ import { Apierr } from "../utils/apierr.js";
 import {User} from "../models/user.model.js"
 import uploadOnCloudinary from "../utils/cloudinary.js"
 import Apiresponse from "../utils/apires.js";
+import jwt from "jsonwebtoken";
 
 
 const generateAccessTokenandRefreshToken = async (userId) => {
@@ -208,8 +209,61 @@ const logoutUser = asyncHandler(async (req, res) => {
         )   });
 
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken =  req.cookies.refreshAccessToken || req.body.refreshAccessToken
+
+    if(incomingRefreshToken?.trim()===""){
+        throw new Apierr(401,"unauthorized request, no token found")
+    }
+    try {
+        const decodedToken=  jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET, async(err, decoded)=>{
+            if(err){
+                throw new Apierr(401,"your session is expired, please login again")
+            }
+    
+    }) 
+    const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
+    
+    if(!user){
+        throw new Apierr(401,"invalid refresh token")   
+    }
+    
+    if(user.refreshToken!==incomingRefreshToken){
+        throw new Apierr(401,"token mismatch, please login again")  
+    }
+    
+    
+    const options={
+        httpOnly:true,
+        secure:true,    
+    
+    }
+    const {accessToken, newRefreshToken} = await generateAccessTokenandRefreshToken(user._id)
+    
+     return res
+     .status(200)
+     .cookie("refreshToken", newRefreshToken, options) // set refresh token in cookie
+     .cookie("accessToken", accessToken, options)   // set access token in cookie
+     json(
+         new Apiresponse(
+             200,
+                {accessToken, refreshToken : newRefreshToken},
+             "Access token successfully refreshed"
+         )
+     )
+          
+    
+ } catch (error) {
+      throw new Apierr(500, error.message|| "Internal server error during token refresh");  
+    }
+
+
+})
+
+
 
 export { registerUser
         ,loginUser,
         logoutUser
+        ,refreshAccessToken,
     }    
