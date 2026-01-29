@@ -1,10 +1,12 @@
-import { json } from "express";
+
 import {asyncHandler} from "../utils/asynchandler.js";
 import { Apierr } from "../utils/apierr.js";
 import {User} from "../models/user.model.js"
 import uploadOnCloudinary from "../utils/cloudinary.js"
 import Apiresponse from "../utils/apires.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+
 
 
 const generateAccessTokenandRefreshToken = async (userId) => {
@@ -95,7 +97,7 @@ const registerUser= asyncHandler(async(req, res)=>{
 
     })  
     const createUser = await User.findById(user._id).select(
-        "-password -refresToken"
+        "-password -refreshToken"
     )  
     if(!createUser){
         throw new Apierr(500,"something went wrong while registering user")
@@ -119,9 +121,13 @@ const loginUser = asyncHandler(async (req, res) => {
     
     // Validate required fields:
     // password must exist and either email or username must be provided
-    if ([password, (email || username)].some((field) => field?.trim() === "")) {
-        throw new Apierr(400, "All field must be required")
-    }
+   if (
+    !password?.trim() ||
+    (!email?.trim() && !username?.trim())
+) {
+    throw new Apierr(400, "All field must be required")
+}
+
 
     // Find user by either email or username
     const user = await User.findOne({
@@ -152,7 +158,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // Fetch logged-in user data again without password and refresh token
     const loggedInUser = await User.findById(user._id).select(
-        "-password -refresToken"
+        "-password -refreshToken"
     )
 
     // Cookie options for security
@@ -182,7 +188,7 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
-    User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
         req.user._id,
         {
              $set: { 
@@ -210,7 +216,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken =  req.cookies.refreshAccessToken || req.body.refreshAccessToken
+    const incomingRefreshToken =  req.cookies.refreshToken || req.body.refreshAccessToken
 
     if(!incomingRefreshToken){
         throw new Apierr(401,"unauthorized request, no token found")
@@ -222,7 +228,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             )
     
     
-    const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
+    const user = await User.findById(decodedToken?._id).select("-password");
     
     if(!user){
         throw new Apierr(401,"invalid refresh token")   
@@ -235,19 +241,22 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     
     const options={
         httpOnly:true,
-        secure:true,    
+        secure:true,
+            
     
     }
-    const {accessToken, newRefreshToken} = await generateAccessTokenandRefreshToken(user._id)
+   const { accessToken, refreshToken } =
+    await generateAccessTokenandRefreshToken(user._id)
+
     
      return res
      .status(200)
-     .cookie("refreshToken", newRefreshToken, options) // set refresh token in cookie
+     .cookie("refreshToken", refreshToken, options) // set refresh token in cookie
      .cookie("accessToken", accessToken, options)   // set access token in cookie
      .json(
          new Apiresponse(
              200,
-                {accessToken, refreshToken : newRefreshToken},
+                {accessToken, refreshToken : refreshToken},
              "Access token successfully refreshed"
          )
      )
@@ -305,7 +314,7 @@ const updatrAccountDetails = asyncHandler(async (req, res) => {
     }
 
 
-const user = User.findByIdAndUpdate(req.user._id,{
+const user = await User.findByIdAndUpdate(req.user._id,{
     $set:{
         fullname,
         email  
@@ -377,6 +386,10 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 }
 )
 const getUserChannalProfile = asyncHandler(async(req,res)=>{
+    if (!req.user?._id) {
+    throw new Apierr(401, "Unauthorized")
+}
+
 
     const {username}= req.params;
     if(!username?.trim()){
@@ -391,7 +404,7 @@ const getUserChannalProfile = asyncHandler(async(req,res)=>{
         }
         ,{
             $lookup:{
-                from:"Subscription",
+                from:"subscriptions",
                 foreignField:"channal",
                 localField:"_id",
                 as:"subscribers"
@@ -399,7 +412,7 @@ const getUserChannalProfile = asyncHandler(async(req,res)=>{
         },
         {
            $lookup:{
-                from:"Subscription",
+                from:"subscriptions",
                 foreignField:"channal",
                 localField:"_id",
                 as:"subscribersTo"
@@ -411,11 +424,12 @@ const getUserChannalProfile = asyncHandler(async(req,res)=>{
             subscribersCount:{$size:"$subscribers"}
            },
            channalsubscribedtoCount:{
-             $size:$subscribedTo
+             $size:"$subscribersTo"
         },
         isSubscribed:{
             $cond:{
-               if:{$in:[req.user._id,"$subscribers.subscriber"]},
+               if:{$in:[new mongoose.Types.ObjectId(req.user._id),
+    "$subscribers.subscriber"]},
                then:true,
                else:false
             }
@@ -434,7 +448,7 @@ const getUserChannalProfile = asyncHandler(async(req,res)=>{
         }
     ])
 
-    if(!channal||channal.length){
+    if(!channal||channal.length===0){
         throw new Apierr(404,"channal not found")
     }
 console.log("channal", channal)
@@ -445,8 +459,52 @@ console.log("channal", channal)
 })
 
 
-const userHistory= asyncHandler(async(req,res)=>{   
+const userWatchHistory= asyncHandler(async(req,res)=>{   
+    if (!req.user?._id) {
+    throw new Apierr(401, "Unauthorized")
+}
 
+    const user = await User.aggregate([
+        {
+            $match:{_id:new mongoose.Types.ObjectId(req.user._id)}
+        },
+        {
+            $lookup:{
+                from:"videos",
+                localField:"watchHistory",  
+                foreignField:"_id",
+                as:"watchHistoryVideos",
+                pipeline:[
+                    {
+                        $lookup:{
+                           from:"users",
+                           localField:"owner",
+                           foreignField:"_id",
+                           as:"owner" ,
+                           pipeline:[
+                            {
+                                $project:{
+                                fullname:1,
+                                username:1,
+                                avatar:1
+                            }}
+                           ]
+
+                        },
+                    },{
+                       $addFields:{
+                        owner:{
+                            $first:"$owner"
+                        }
+                       } 
+                    }
+                ]
+            }
+    }
+    ])
+    return res.status(200).json(
+        new Apiresponse(200,user[0]?.watchHistoryVideos||[],"user watch history fetched successfully")
+    )
 })
 
 
@@ -468,5 +526,7 @@ export { registerUser
         ,updateUserCoverImage
         ,getUserChannalProfile
         ,getCurrentuser
+        ,userWatchHistory
+        ,
         
     }    
