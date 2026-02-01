@@ -1,26 +1,30 @@
-# Y_PROJECT – Development Log
+📘 Development Log – Y_PROJECT Backend
 
-This file records the chronological development of the backend system.
-Each entry shows what was built, when, and how.
+This document tracks the structured, chronological development of the backend system, including architectural decisions, implementations, and technical challenges.
 
----
-
-## 📅 30 December 2025  
-⏰ Time: 11:18 PM IST  
+📅 30 December 2025 — 11:18 PM IST
 🎯 Milestone: MongoDB Connection Established
+Overview
 
-### What was implemented
-The backend was successfully connected to MongoDB Atlas using Mongoose.  
-Environment variables were configured using `dotenv`, and the database connection was made mandatory before starting the Express server.
+The backend was successfully connected to MongoDB Atlas using Mongoose. The server startup process was redesigned so the Express app only starts after a successful database connection.
 
-### Steps performed
+Implementation Details
 
-1. Created `.env` file to store sensitive credentials:
+Environment Configuration
 
-2. Implemented a MongoDB connection module:
-```js
-mongoose.connect(`${process.env.MONGODB_URL}/${DB_NAME}`)
-3.Built an async startup system using an IIFE:
+Created a .env file to store sensitive credentials securely
+
+Loaded environment variables using:
+
+import "dotenv/config";
+
+
+Database Connection Module
+
+mongoose.connect(`${process.env.MONGODB_URL}/${DB_NAME}`);
+
+
+Async Server Startup Pattern
 
 (async () => {
   await connectDB();
@@ -28,302 +32,361 @@ mongoose.connect(`${process.env.MONGODB_URL}/${DB_NAME}`)
 })();
 
 
-Problems faced
+This ensures the server never runs without a live database connection.
 
-MongoDB failed due to incorrect connection string
+Challenges Faced
+Issue	Cause	Resolution
+MongoDB connection failure	Incorrect connection string	Corrected Atlas connection URI
+Authentication error	Special characters (@) in password	URL-encoded password (%40)
+Module import errors	ES Modules in use	Replaced require() with import syntax
+Outcome
 
-Special characters (@) in password had to be URL-encoded
+A reliable and production-safe database initialization flow is now in place.
 
-ES Modules required replacing require() with import
-
-Solution
-
-Fixed .env formatting (no spaces)
-
-Encoded password using %40
-
-Used import "dotenv/config" for ES Modules
-
-
-## 📅 30 December 2025  
-⏰ Time: 02:15 AM IST  
+📅 31 December 2025 — 02:15 AM IST
 🎯 Milestone: API Utility Layer Implemented
+Overview
 
-### What was implemented
-A core utility layer was added to standardize how the backend handles API responses and errors. This includes:
+A reusable API utility layer was introduced to standardize response formatting and error handling across the backend.
 
-- A custom `Apierr` class for structured API errors  
-- A `Apiresponse` class for consistent success responses  
-- An `asyncHandler` middleware to eliminate repetitive try/catch blocks in controllers  
+Components Added
+File	Purpose
+utils/Apierr.js	Custom structured error class
+utils/Apiresponse.js	Standard success response formatter
+utils/asyncHandler.js	Wrapper to catch async errors automatically
+Architectural Improvement
 
-### Purpose
-These utilities ensure that all API responses follow a predictable and professional format. They also centralize error handling, making the backend more stable, readable, and production-ready.
+Controllers now follow a clean, consistent contract:
 
-### Files added
-utils/Apierr.js
-utils/Apiresponse.js
-utils/asyncHandler.js
+Throw Apierr for operational failures
 
+Return Apiresponse for successful operations
 
+Wrapped with asyncHandler to remove repetitive try/catch blocks
 
-### Architecture improvement
-Controllers will now:
-- Throw `Apierr` for failures
-- Return `Apiresponse` for success
-- Be wrapped with `asyncHandler` to catch async errors automatically
+This significantly improves maintainability and readability.
 
-This establishes a clean API contract for all future routes.
+Outcome
 
-### Result
-The backend now has a structured, scalable response and error-handling system aligned with professional backend engineering practices.
+The backend now follows a professional-grade API response structure, enabling scalable route development and centralized error management.
 
-### What this enables next
-- User authentication routes
-- Protected APIs
-- Centralized error middleware
+Enables Next
 
+Authentication system
 
-## 3:49 
-i am going to push user and video model
+Protected routes
 
+Global error middleware
 
-## 7:14 pm
-## 📅 30 December 2025  
-⏰ Time: 02:15 AM IST  
+📅 31 December 2025 — 07:14 PM IST
 🎯 Milestone: Media Upload Pipeline Implemented (Multer + Cloudinary)
+Overview
 
-### What was implemented
-A complete media upload system was added to the backend using **Multer** for temporary file storage and **Cloudinary** for permanent cloud storage of images and videos.
+A complete media upload pipeline was integrated using Multer for temporary file handling and Cloudinary for permanent cloud storage of images and videos.
 
-This allows the application to safely accept user-uploaded files, process them on the server, and store them in a scalable cloud-based media service.
+This enables secure, scalable handling of user-uploaded media.
 
----
+System Components
+1️⃣ Multer Disk Storage
 
-### Components added
+Temporary storage directory:
 
-#### 1. Multer Disk Storage
-Files are temporarily stored inside:
+public/temp
 
 
-Multer handles:
-- Multipart form data
-- File naming
-- Temporary disk storage before upload
+Responsibilities:
 
-Each file is assigned a unique timestamp-based name to avoid overwriting.
+Handles multipart/form-data
 
----
+Assigns unique timestamp-based filenames
 
-#### 2. Cloudinary Upload Utility
-A reusable Cloudinary upload function was created to:
+Stores files temporarily before cloud upload
 
-- Accept a local file path
-- Upload the file to Cloudinary
-- Automatically detect image or video type
-- Delete the local file after successful upload
+2️⃣ Cloudinary Upload Utility
 
-This ensures the backend does not accumulate unnecessary files on disk.
+A reusable upload function was implemented to:
 
----
+Accept a local file path
 
-### Architecture Flow
+Upload media to Cloudinary
 
+Automatically detect resource type (image/video)
+
+Delete the local file after successful upload
+
+This prevents unnecessary disk usage on the server.
+
+Media Processing Flow
 Client Upload
-↓
-Multer (public/temp)
-↓
-Cloudinary (Cloud Storage)
-↓
-Local file deleted
-↓
-Cloud URL returned
+   ↓
+Multer (Temporary Storage)
+   ↓
+Cloudinary (Permanent Storage)
+   ↓
+Local File Deleted
+   ↓
+Cloud URL Stored in Database
 
 
-This is the standard pattern used in production-grade backend systems.
+This mirrors industry-standard backend media handling practices.
 
----
+Why This Matters
 
-### Why this matters
-This implementation provides:
-- Scalable media storage
-- Secure file handling
-- Support for both images and videos
-- Clean separation between temporary and permanent storage
+✔ Scalable cloud-based media storage
+✔ Secure file handling workflow
+✔ Supports both image and video uploads
+✔ Clean separation of temporary vs permanent storage
 
-It prepares the backend for:
-- User profile images
-- Post media
-- AI image processing
-- Video uploads
+📌 Notes Logged During Development
 
----
+Developer noted intent to push User and Video models after utility layer completion.
+📘 Development Log – Y_PROJECT Backend (Continued)
+📅 31 December 2025 — 07:14 PM IST
+🎯 Milestone: Media Upload Pipeline Implemented (Multer + Cloudinary)
+What This System Enables
 
-### Files involved
-middlewares/multer.js
-utils/cloudinary.js
+This media pipeline prepares the backend for:
+
+User profile image uploads
+
+Post media attachments
+
+AI-based image processing workflows
+
+Video uploads and storage
+
+Core Files
+File	Responsibility
+middlewares/multer.js	Handles multipart form data and temporary file storage
+utils/cloudinary.js	Uploads media to Cloudinary and removes local temp files
+Result
+
+The backend now includes a fully functional, cloud-based media upload system integrated into its architecture.
+This serves as a foundational layer for all user-generated content features.
+
+📅 01 January 2026 — 10:00 PM IST
+🎯 Task: API Connectivity & Routing Validation (Postman Testing)
+Overview
+
+The backend routing layer was validated end-to-end using Postman to simulate client requests. This marked the first successful full pipeline test of the API infrastructure.
+
+Components Integrated
+File	Purpose
+user.routes.js	Defines route paths and HTTP methods
+user.controller.js	Implements business logic
+app.js	Registers middleware and mounts routes
+
+Routes were mounted under:
+
+/api/v1/users
+
+Validation Checklist
+
+Using Postman, the following were verified:
+
+Router correctly mounted in Express
+
+Requests reached the intended controller
+
+Middleware stack (JSON parser, CORS, cookies) functioned correctly
+
+API returned structured JSON responses
+
+Architectural Significance
+
+This confirmed that the backend request lifecycle is functioning:
+
+Client Request → Express Router → Controller → Response
+
+Outcome
+
+The routing foundation is now stable, allowing safe progression toward authentication, database operations, and frontend integration.
+
+📅 02 January 2026 — 11:14 AM IST
+🎯 Task: User Registration System Implemented
+Overview
+
+The user registration pipeline was fully developed, enabling secure onboarding of new users with media upload and cloud storage integration.
+
+Registration Workflow
+
+The controller executes the following sequence:
+
+Validates required fields
+
+fullname, username, email, password
+
+Email format validation using regex
+
+Duplicate account check
+
+Prevents existing username or email
+
+Avatar validation
+
+Ensures file is received via Multer
+
+Cloudinary upload
+
+Avatar (required)
+
+Cover image (optional)
+
+MongoDB persistence
+
+Stores user data + Cloudinary URLs
+
+Response sanitization
+
+Excludes password and refreshToken
+
+Standardized success response
+
+Uses structured API response format
+
+Result
+
+A production-grade user registration system is now integrated using:
+
+Express.js
+
+MongoDB + Mongoose
+
+Multer
+
+Cloudinary
+
+Status at This Stage
+
+The feature was implemented without server crashes.
+Next step identified: full validation of file uploads and field checks.
+
+📅 02 January 2026 — 03:42 PM IST
+🎯 Milestone: User Registration Pipeline Fully Operational
+
+The registration system was debugged and elevated to a fully working production-ready flow. Several critical issues were identified and resolved.
+
+🐞 Issue 1: Multer Not Receiving Files (req.files === undefined)
+
+Observed Error
+
+"avatar is required"
 
 
----
+Root Cause
 
-### Result
-The backend now has a fully functional, cloud-based media upload system integrated with its architecture.
+Route was not consistently passing through Multer middleware
 
-This is a critical building block for all user-generated content features.
+Postman requests sometimes not sent as multipart/form-data
 
+Incorrect endpoint usage during testing
 
+Fix Applied
 
-### 
-1 January 2026, 10:00 PM
-
-Task: API connectivity and routing validation using Postman
-
-Today I completed the first end-to-end validation of the backend routing layer by integrating the user router, controller, and app.js entry point and testing the API flow through Postman.
-
-I created and wired the following components:
-
-user.routes.js to define route paths and HTTP methods
-
-user.controller.js to handle business logic and responses
-
-app.js to register middleware and mount the user router under /api/v1/users
-
-After connecting these layers, I used Postman as a client simulator to send HTTP requests to the API. This allowed me to verify that:
-
-The router was correctly mounted
-
-Requests were reaching the correct controller
-
-Express middleware (JSON parser, CORS, cookies) was functioning
-
-The server was returning the expected JSON response
-
-Postman was used to simulate real client behavior by sending requests directly to the backend without a frontend. This confirmed that the backend request pipeline — from URL → Router → Controller → Response — is working correctly.
-
-This step ensures that the foundation of the API is stable before adding authentication, database integration, or frontend communication.
-
-Status: Backend routing layer successfully verified using Postman.
-
-
-
- 2 January 2026, 11:14 AM
-
-Task: Completion of user registration system with file upload and Cloudinary integration
-
-Today the user registration module of the backend was fully implemented and validated. The registration flow now handles complete user onboarding, including input validation, duplicate account prevention, media upload, and secure database persistence.
-
-The controller now performs the following operations in sequence:
-
-Validates required fields (fullname, username, email, password)
-
-Verifies email format using regex validation
-
-Checks MongoDB for existing users with the same username or email
-
-Validates the presence of an avatar file via Multer
-
-Uploads avatar and optional cover image to Cloudinary
-
-Stores Cloudinary URLs along with user details in MongoDB
-
-Excludes sensitive fields (password and refresh token) from API responses
-
-Returns a structured success response using a standardized API response format
-
-This establishes a production-grade registration pipeline using Express, MongoDB (Mongoose), Multer, and Cloudinary, confirming that the backend can now safely accept, process, and store new user accounts.
-
-Status: User registration coded successfully without any server crash but now we want to test files and all validating code actually working or not 
-
-2 January 2026, 3:42 PM
-
-Milestone: User Registration Pipeline Fully Operational
-
-Today the user registration system was brought from a broken state to a fully working production-grade pipeline. The following issues were encountered and systematically resolved.
-
-1. Multer Not Receiving Files (req.files === undefined)
-
-Error observed
-
-Controller always returned: "avatar is required"
-
-req.files was undefined
-
-Root cause
-
-The request was not going through the Multer middleware or was hitting the wrong route.
-
-In some cases, Postman was not sending multipart/form-data to the correct endpoint.
-
-Fix
-
-Confirmed route was mounted at:
+Confirmed route path:
 
 /api/v1/users/register
 
 
-Ensured route used:
+Ensured middleware usage:
 
 upload.fields([{ name: "avatar" }, { name: "coverImage" }])
 
 
-Ensured Postman used form-data and correct field names.
+Corrected Postman request type to form-data
 
-Added debug middleware to prove Multer was running.
+Matched field names exactly: avatar, coverImage
 
-2. Cloudinary Returning “Must supply api_secret”
+Added debug logging to verify Multer execution
 
-Error
+🐞 Issue 2: Cloudinary Error — “Must supply api_secret”
 
-Must supply api_secret
+Root Cause
+Cloudinary environment variables were not properly loaded into the runtime environment.
+
+Fix Applied
+
+Verified .env variables:
+
+CLOUDINARY_CLOUD_NAME
+
+CLOUDINARY_API_KEY
+
+CLOUDINARY_API_SECRET
+
+Ensured dotenv/config loads before Cloudinary initialization
+
+Restarted server after environment updates
+
+Outcome
+
+✔ File upload middleware functioning correctly
+✔ Cloudinary integration verified
+✔ Registration endpoint successfully processes full user onboarding
+
+The user registration pipeline is now fully operational and production-ready.
+📘 Development Log – Y_PROJECT Backend (Continued)
+📅 02 January 2026 — Evening Session
+🎯 Milestone: User Registration Pipeline Stabilization & Bug Fixes
+
+During final testing of the user registration system, multiple backend failures were discovered and resolved. This phase transformed the feature from “working sometimes” into a stable, production-grade pipeline.
+
+🐞 Issue 2 (Continued): Cloudinary “Must supply api_secret”
+
+Root Cause
+Environment variable typo in .env:
+
+CLOUDINARY_API_SECRETE   ❌
+CLOUDINARY_API_SECRET    ✅
 
 
-Root cause
+Fix Applied
 
-Environment variable typo:
-CLOUDINARY_API_SECRETE instead of CLOUDINARY_API_SECRET
+Corrected the variable name
 
-Fix
+Restarted the server to reload environment variables
 
-Corrected .env variable name.
+🐞 Issue 3: Cloudinary “Invalid Signature” Error
 
-3. Cloudinary “Invalid Signature” Errors
-
-Error
+Error Message
 
 Invalid Signature ... timestamp=...
 
 
-Root cause
+Root Causes
 
-Cloudinary API Key and Secret did not match.
+Cloudinary API Key and Secret did not match
 
-Also caused by wrong environment variable casing:
-CLOUDINARY_API_key instead of CLOUDINARY_API_KEY.
+Incorrect environment variable casing:
 
-Fix
+CLOUDINARY_API_key   ❌
+CLOUDINARY_API_KEY   ✅
 
-Generated new API key in Cloudinary dashboard.
 
-Ensured .env contained:
+Fix Applied
+
+Generated a new API key from the Cloudinary Dashboard
+
+Standardized environment variables:
 
 CLOUDINARY_CLOUD_NAME
 CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
 
 
-Removed all duplicate and misspelled Cloudinary variables.
+Removed all duplicate or misspelled Cloudinary variables
 
-4. MongoDB Validation Error
+🐞 Issue 4: MongoDB Validation Error
 
-Error
+Error Message
 
 User validation failed: email is required
 
 
-Root cause
+Root Cause
+The email field was not included in the User.create() call.
 
-email was missing in User.create().
-
-Fix
+Fix Applied
 
 User.create({
   fullname,
@@ -334,24 +397,23 @@ User.create({
   coverImage
 });
 
-5. “next is not a function” (Express & Mongoose Crash)
+🐞 Issue 5: “next is not a function” — Mongoose Pre-save Hook Crash
 
-Error
+Error Message
 
 TypeError: next is not a function
 at user.model.js
 
 
-Root cause
+Root Cause
+A Mongoose middleware hook was incorrectly written using an arrow function, which breaks access to this and next.
 
-Mongoose pre-save hook was written using arrow function:
+Incorrect
 
 userSchema.pre("save", async (next) => {})
 
 
-which breaks this and next.
-
-Fix
+Fix Applied
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -359,39 +421,35 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-6. asyncHandler Breaking Express Pipeline
+🐞 Issue 6: asyncHandler Breaking Express Middleware Chain
 
-Error
+Error Message
 
 next is not a function
 
 
-Root cause
+Root Cause
+The custom asyncHandler did not correctly forward errors to Express.
 
-asyncHandler was swallowing errors and not forwarding next.
-
-Fix
-Replaced with:
+Fix Applied
 
 const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
-7. Final Result
 
-After all fixes:
+This restores proper error propagation to global error middleware.
 
-Multer received files
+✅ Final System State After Fixes
 
-Cloudinary authenticated and uploaded
+After resolving all issues:
 
-MongoDB saved user
+✔ Multer correctly receives uploaded files
+✔ Cloudinary authenticates and uploads media
+✔ MongoDB successfully stores user data
+✔ Passwords are securely hashed before saving
+✔ API returns structured, sanitized responses
 
-Password was hashed
-
-API returned clean response
-
-Final successful response:
-
+📦 Example Successful Registration Response
 {
   "success": true,
   "data": {
@@ -406,164 +464,182 @@ Final successful response:
   "message": "User successfully registered"
 }
 
-Status
+🚀 Outcome
 
-User Registration with File Upload + Cloudinary + MongoDB is now fully functional and production-grade.
+The User Registration feature is now fully stable, secure, and production-ready, forming the foundation for:
 
+Authentication (login/logout)
 
-### 03 January 2026 — 12:20 PM
-Authentication & Logout System Implemented
+Profile management
 
-Today we successfully completed the core authentication layer for the backend of Y_PROJECT. This marks a major milestone because the system now supports secure user login, session management, and controlled logout using industry-standard JWT and cookie-based security.
+Media-based user content
 
-What was completed
+📘 Development Log – Y_PROJECT Backend (Continued)
+📅 02 January 2026 — Final Status
+✅ Milestone: User Registration System Production-Ready
 
-1. Login System
+The User Registration pipeline — including file upload, Cloudinary integration, MongoDB storage, password hashing, and response sanitization — is now fully functional and production-grade.
 
-Implemented user login using email or username + password.
+This completes the foundational user onboarding system.
 
-Added secure password comparison using the model method.
+📅 03 January 2026 — 12:20 PM IST
+🎯 Milestone: Authentication & Logout System Implemented
+
+A complete authentication layer was introduced, enabling secure login, token-based session management, and protected logout functionality using JWT and HTTP-only cookies.
+
+🔐 Features Implemented
+1️⃣ Login System
+
+Users can authenticate using:
+
+Email + Password
+
+Username + Password
 
 On successful login:
 
-Generated Access Token (short-lived).
+Access Token (short-lived) generated
 
-Generated Refresh Token (long-lived).
+Refresh Token (long-lived) generated
 
-Stored refresh token in the database.
+Refresh token stored in MongoDB
 
-Sent both tokens as HTTP-only, secure cookies.
+Both tokens sent as HTTP-only secure cookies
 
-2. JWT Authentication Middleware
+2️⃣ JWT Authentication Middleware
 
-Built verifyJWT middleware to:
+A verifyJWT middleware was implemented to:
 
-Read tokens from cookies or Authorization header.
+Read tokens from cookies or Authorization header
 
-Validate JWT signature and expiry.
+Validate JWT signature and expiration
 
-Load the authenticated user from MongoDB.
+Fetch the authenticated user from MongoDB
 
-Attach req.user for protected routes.
+Attach req.user to protected routes
 
-3. Protected Logout System
+3️⃣ Protected Logout System
 
-Logout route is now protected by JWT middleware.
+Logout route now requires valid authentication.
 
 On logout:
 
-Refresh token is removed from database.
+Refresh token removed from database
 
-Access and refresh token cookies are cleared.
+Access and refresh cookies cleared
 
-User session is invalidated.
+User session fully invalidated
 
-4. Secure Cookie-Based Auth
+4️⃣ Secure Cookie-Based Authentication
 
-Implemented httpOnly and secure cookies for:
+Authentication tokens are stored in:
 
-Protection from XSS attacks.
+httpOnly cookies → protects from XSS
 
-Safer token storage compared to localStorage.
+secure cookies → transmitted only over HTTPS
 
-Current Status
+This approach is significantly safer than localStorage-based token storage.
 
-Authentication flow is now fully wired and functional at backend level.
-All core login, token, middleware, and logout logic has been implemented.
+📌 Current System Status
 
-Next Pending Task
+✔ Backend authentication flow fully wired
+✔ Login, token generation, middleware, and logout implemented
 
-End-to-end testing using:
+⏭ Next Planned Validation
 
-Postman / Thunder Client
+Postman / Thunder Client end-to-end testing
 
-Cookie behavior
+Cookie transmission verification
 
-Token expiry & refresh flows
+Token expiry and refresh logic testing
 
-Protected route validation
+Protected route access validation
 
-
-DEVLOG — Authentication System Debugging & Stabilization
-
-Date: 03 Jan 2026
-Time Completed: 10:18 PM
-
+🛠 DEVLOG — Authentication System Debugging & Stabilization
+📅 03 January 2026 — Completed at 10:18 PM IST
 Overview
 
-This session focused on stabilizing the authentication system for Y_PROJECT.
-The system initially failed during login, token generation, and refresh-token storage due to multiple schema, middleware, and configuration defects.
-All issues have now been identified, corrected, and verified.
+This session focused on stabilizing the authentication system after encountering failures during login and refresh-token handling. Multiple schema and middleware defects were identified and resolved.
 
-The system now supports:
+The system now reliably supports:
 
-Login using username + password
+Login via username + password
 
-Login using email + password
+Login via email + password
 
-Secure access token and refresh token issuance
+Secure access & refresh token issuance
 
 Cookie-based session handling
 
-Errors Encountered & How They Were Fixed
-1. Password Was Being Re-Hashed on Every Save
-
+🐞 Issue 1: Password Re-Hashed on Every Save
 Problem
-The password hashing middleware was incorrectly implemented.
-Whenever refreshToken was updated, the password was being hashed again, corrupting it.
 
-This caused:
+Whenever the refreshToken field was updated, the password hashing middleware ran again, corrupting the stored password hash.
 
-Valid passwords to stop matching
+Symptoms
 
-invalid credentials even when correct password was used
+Correct passwords stopped matching
+
+Login returned “invalid credentials”
 
 Root Cause
-The pre("save") middleware was missing the password-change check or had incorrect control flow.
 
-Fix
+The pre("save") middleware lacked proper password modification checks.
 
+Fix Applied
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
 
-This ensures:
+Result
 
-Password hashes only once
+Password hashes only when modified
 
-Refresh token updates do not touch the password
+Refresh token updates no longer affect password
 
-2. next is not a function During Login
-
+🐞 Issue 2: “next is not a function” During Login
 Problem
-Login crashed when saving refresh tokens.
+
+Login crashed while saving the refresh token.
 
 Root Cause
-Mongoose was using promise-based middleware (async function), but the schema was written using callback-based next().
-In Mongoose 6+, async middleware does NOT receive next.
 
-Calling next() caused:
+Mongoose v6+ uses promise-based middleware.
+The schema incorrectly mixed callback-style next() with async middleware.
+
+This caused:
 
 Error: next is not a function
 
+Fix Applied
 
-Fix
-Removed all usage of next() from pre("save") and used promise style only.
+Removed all usage of next() in async middleware
 
-3. Refresh Token Was Using Access Token Secret
+Converted to promise-style middleware only
+
+✅ Outcome After Stabilization
+
+✔ Password hashing logic corrected
+✔ Refresh token updates safe
+✔ Login system stable
+✔ Token generation and storage working
+✔ Cookie-based authentication functioning correctly
+📘 Development Log – Y_PROJECT Backend (Continued)
+📅 03 January 2026 — Authentication Stabilization (Continued)
+🐞 Issue 3: Refresh Token Signed with Wrong Secret
 
 Problem
-Refresh tokens were being signed using:
+Refresh tokens were mistakenly signed using:
 
 ACCESS_TOKEN_SECRET
-
 ACCESS_TOKEN_EXPIRY
 
-This broke token rotation and caused JWT failures.
 
-Fix
+This broke refresh token rotation and caused JWT verification failures.
+
+Fix Applied
 
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
@@ -573,149 +649,174 @@ userSchema.methods.generateRefreshToken = function () {
   );
 };
 
-4. Environment Variables Were Incorrect
+
+Refresh tokens now use a dedicated secret and expiry configuration.
+
+🐞 Issue 4: Incorrect Environment Variables
 
 Problem
-.env contained:
+
+The .env file contained invalid entries:
 
 REFRESH_TOKEN_EXPIRY=longRandomString
 REFRESH_TOKEN_EXPIRY=10D
 
 
-There was no REFRESH_TOKEN_SECRET.
+There was no REFRESH_TOKEN_SECRET, causing JWT signing to fail.
 
-JWT signing failed because the secret was undefined.
+Fix Applied
 
-Fix
-Corrected environment variables:
+Standardized environment variables:
 
-REFRESH_TOKEN_SECRET=<secure random string>
+REFRESH_TOKEN_SECRET=<secure_random_string>
 REFRESH_TOKEN_EXPIRY=10d
 
-5. Password Field Was Marked as unique
+
+Server restarted to ensure correct loading.
+
+🐞 Issue 5: Password Field Marked as unique
 
 Problem
-Passwords were defined as unique: true.
-Since bcrypt can generate identical hashes, MongoDB rejected saves when refresh tokens were written.
+The password field had unique: true.
+Because bcrypt can occasionally produce identical hashes, MongoDB rejected saves when refresh tokens were updated.
 
-Fix
-Removed unique: true from password field and deleted the index from MongoDB.
+Fix Applied
 
-6. Incorrect Method Name
+Removed unique: true from the password schema field
+
+Deleted the existing unique index from MongoDB
+
+🐞 Issue 6: Incorrect Password Comparison Method
 
 Problem
-Controller was calling:
+
+Controller called:
 
 user.comparePassword()
 
 
-But schema defined:
+But the schema defined:
 
 ispasswordmatched()
 
 
-Fix
-Updated controller to:
+Fix Applied
 
-user.ispasswordmatched(password)
+Updated controller usage:
 
-Final System Status
+user.ispasswordmatched(password);
 
-As of 10:18 PM, the authentication system is fully operational.
+✅ Authentication System Status (03 Jan 2026 — 10:18 PM IST)
 
-The system now supports:
+The authentication system is now fully operational and stable.
 
-Login via username + password
+System Capabilities
 
-Login via email + password
+✔ Login via username + password
+✔ Login via email + password
+✔ Secure cookie-based session handling
+✔ Stable refresh token storage
+✔ No password corruption
+✔ No JWT signing errors
+✔ No middleware crashes
 
-Secure cookie-based sessions
+📅 23 January 2026 — 11:09 AM IST
+🎯 Milestone: Refresh Token Rotation System Implemented
+Overview
 
-Stable refresh token storage
-
-No password corruption
-
-No JWT signing errors
-
-No middleware crashes
-
-Date: Friday, January 23, 2026
-Time: 11:09 AM
-
-Summary
-
-Implemented a refresh token mechanism to securely regenerate access tokens when they expire, improving session continuity and user experience without forcing re-login.
+A refresh token mechanism was implemented to regenerate access tokens after expiration, ensuring seamless session continuity without forcing users to log in again.
 
 Work Completed
 
-Added refresh access token controller logic in user.controller.js.
+Added refresh-token controller logic in user.controller.js
 
-Implemented JWT-based verification using REFRESH_TOKEN_SECRET.
+Implemented JWT verification using REFRESH_TOKEN_SECRET
 
-Retrieved refresh token from HTTP-only cookies or request body.
+Retrieved refresh token from:
+
+HTTP-only cookies
+
+Request body (fallback)
 
 Validated refresh token against:
 
 JWT signature
 
-User existence in database
+User existence in MongoDB
 
-Token match with stored refresh token (token rotation safety).
+Match with stored refresh token (rotation safety)
 
-Generated new access token and refresh token using a centralized utility function.
+Generated new access + refresh tokens using a centralized utility
 
-Sent refreshed tokens back via secure, HTTP-only cookies.
+Sent updated tokens back via secure HTTP-only cookies
 
-Handled edge cases:
+Edge Cases Handled
 
 Missing refresh token
 
 Invalid or expired token
 
-Token mismatch (possible reuse or logout scenario).
+Token mismatch (reuse or forced logout scenario)
 
-Ensured proper HTTP status codes and structured API responses.
+Security Measures
 
-Security Considerations
-
-Used HTTP-only cookies to prevent XSS access.
-
-Enabled secure and sameSite: "strict" flags for CSRF protection.
-
-Implemented refresh token validation against database to prevent token reuse.
+✔ HTTP-only cookies (prevents XSS access)
+✔ secure and sameSite: "strict" cookie flags (CSRF protection)
+✔ Refresh token validation against database (prevents token reuse)
 
 Files Modified
-
-src/controllers/user.controller.js
-
+File	Description
+src/controllers/user.controller.js	Refresh token controller implementation
 Outcome
 
-Users can now continue using the platform seamlessly after access token expiration.
+Users can now maintain active sessions even after access token expiry.
+The authentication system is now more secure, scalable, and aligned with modern production standards.
 
-Authentication flow is more secure, scalable, and production-ready.
+🎥 Devlog — Video Module Development
+📅 01 February 2026 — 1:40 PM IST
+📦 Module: Video Management System
 
-
-📅 Devlog — Video Module Development
-
-Date: Sunday, February 1, 2026
-Time: 1:40 PM
-Module: Video Management System
 Status: Controllers Implemented ✅ | Testing Pending ⏳
 
 🎯 Objective
 
-Implemented backend controller logic for the Video feature, including publishing, updating, deleting, fetching, and managing publish status. Focus was on database integration, file uploads, ownership checks, and aggregation pipelines.
+To build the backend foundation for handling video-based content within Y_PROJECT, including upload handling, database storage, and controller logic for video operations.
+🎥 Development Log — Video Management Module
+📅 01 February 2026 — 1:40 PM IST
+🎯 Milestone: Video Controller Layer Implemented
+
+Status: Controllers Complete ✅ | Testing Pending ⏳
+
+Overview
+
+Backend controller logic for the Video Management System was implemented.
+This module handles full lifecycle operations for video content, including publishing, retrieval, updates, deletion, filtering, and visibility control.
+
+Focus areas included:
+
+Database integration (MongoDB + Mongoose)
+
+Media upload handling (Cloudinary)
+
+Ownership authorization checks
+
+Aggregation pipelines for optimized queries
 
 ✅ Features Implemented
-1️⃣ Publish Video (PublishAddVideo)
+1️⃣ Publish Video — publishAddVideo
 
 Purpose: Upload a new video with thumbnail and store metadata.
 
-Key Logic:
+Core Logic
 
 Accepts title and description
 
-Uploads video file and thumbnail to Cloudinary
+Uploads:
+
+Video file
+
+Thumbnail image
+to Cloudinary
 
 Stores:
 
@@ -723,13 +824,11 @@ Video URL
 
 Thumbnail URL
 
-Duration
+Video duration
 
 Owner ID (from JWT middleware)
 
-Returns success response with created video
-
-Validation Covered:
+Validation Covered
 
 Video file required
 
@@ -737,11 +836,11 @@ Thumbnail required
 
 Cloudinary upload failure handling
 
-2️⃣ Get Video by ID (getVideobyId)
+2️⃣ Get Video by ID — getVideoById
 
-Purpose: Fetch single video details with owner info.
+Purpose: Retrieve detailed information for a single video.
 
-Key Logic:
+Core Logic
 
 Validates MongoDB ObjectId
 
@@ -751,37 +850,51 @@ Matches video by ID
 
 Joins owner data from users collection
 
-Projects only required fields (username, email, avatar)
+Projects only required fields:
 
-Returns formatted video object
+username
 
-3️⃣ Update Video (updateVideo)
+email
 
-Purpose: Update title, description, or thumbnail.
+avatar
 
-Key Logic:
+Returns a structured video object with embedded owner details.
+
+3️⃣ Update Video — updateVideo
+
+Purpose: Modify video metadata or thumbnail.
+
+Core Logic
 
 Validates video ID
 
 Confirms ownership (only uploader can edit)
 
-Optional thumbnail update:
+Supports partial updates:
 
-Upload new thumbnail
+Title
+
+Description
+
+Thumbnail
+
+Thumbnail Update Flow
+
+Upload new thumbnail to Cloudinary
 
 Delete old thumbnail from Cloudinary
 
-Partial update using $set
+Apply updates using $set
 
-4️⃣ Delete Video (deleteVideo)
+4️⃣ Delete Video — deleteVideo
 
-Purpose: Remove a video and its media files.
+Purpose: Remove a video and all associated media.
 
-Key Logic:
+Core Logic
 
 Validates video ID
 
-Ownership verification
+Verifies ownership
 
 Deletes:
 
@@ -789,54 +902,61 @@ Video file from Cloudinary
 
 Thumbnail from Cloudinary
 
-Video document from database
+Video document from MongoDB
 
-5️⃣ Get All Videos (getAllVideos)
+Prevents orphaned cloud storage files.
 
-Purpose: Fetch paginated video list with filters.
+5️⃣ Get All Videos — getAllVideos
 
-Filters Implemented:
+Purpose: Fetch paginated and filtered video listings.
+
+Filters Implemented
 
 Search by title/description (regex)
 
-Filter by user ID
+Filter by uploader (user ID)
 
 Only published videos
 
-Enhancements:
+Enhancements
 
-Sorting (dynamic field + asc/desc)
+Dynamic sorting (field + ascending/descending)
 
-Aggregation join with owner info
+Aggregation join with owner information
 
-Pagination via aggregatePaginate
+Pagination using aggregatePaginate
 
-6️⃣ Toggle Publish Status (toggleVideoPublishStatus)
+6️⃣ Toggle Publish Status — toggleVideoPublishStatus
 
-Purpose: Switch video between published/unpublished.
+Purpose: Switch a video between published and unpublished states.
 
-Key Logic:
+Core Logic
 
 Ownership verification
 
-Flips isPublished boolean
+Toggles isPublished boolean
 
-Saves updated status
+Saves updated document
 
-🔒 Security Implemented
+🔒 Security Measures
 
-JWT-based user authentication assumed
+JWT-based authentication assumed for all protected routes
 
-Ownership checks before update/delete/publish toggle
+Ownership verification before:
+
+Update
+
+Delete
+
+Publish status toggle
 
 ObjectId validation to prevent malformed queries
 
-📦 External Services Used
-
-Cloudinary for video & image hosting
-
-MongoDB Aggregation for advanced queries
-
+📦 External Services & Techniques
+Service / Technique	Purpose
+Cloudinary	Video & thumbnail hosting
+MongoDB Aggregation	Efficient joins & filtering
+Aggregate Pagination	Scalable listing responses
 ⚠️ Pending Work
 Task	Status
 Route testing via Postman	⏳ Pending
@@ -844,11 +964,11 @@ Cloudinary deletion utility verification	⏳ Pending
 Edge case testing (large files, invalid formats)	⏳ Pending
 Auth middleware integration testing	⏳ Pending
 API documentation	⏳ Pending
-🧠 Notes
+🧠 Engineering Notes
 
-Controller structure follows consistent asyncHandler + ApiError + ApiResponse pattern
+Controllers follow standardized pattern:
+asyncHandler + ApiError + ApiResponse
 
-Aggregation pipelines used for efficient joins instead of multiple queries
+Aggregation pipelines used instead of multiple queries for performance
 
-File cleanup logic added to prevent orphaned Cloudinary files
-
+File cleanup logic ensures no unused Cloudinary assets remain
