@@ -17,5 +17,6 @@ app.use(cookieParser());
 // mount router
 import router from "./routes/user.routes.js";
 app.use("/api/v1/users", router);
+app.use("/api/v1/videos", videoRouter); 
 
 export default app;
