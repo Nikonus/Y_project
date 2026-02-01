@@ -695,5 +695,160 @@ Users can now continue using the platform seamlessly after access token expirati
 Authentication flow is more secure, scalable, and production-ready.
 
 
+📅 Devlog — Video Module Development
 
+Date: Sunday, February 1, 2026
+Time: 1:40 PM
+Module: Video Management System
+Status: Controllers Implemented ✅ | Testing Pending ⏳
+
+🎯 Objective
+
+Implemented backend controller logic for the Video feature, including publishing, updating, deleting, fetching, and managing publish status. Focus was on database integration, file uploads, ownership checks, and aggregation pipelines.
+
+✅ Features Implemented
+1️⃣ Publish Video (PublishAddVideo)
+
+Purpose: Upload a new video with thumbnail and store metadata.
+
+Key Logic:
+
+Accepts title and description
+
+Uploads video file and thumbnail to Cloudinary
+
+Stores:
+
+Video URL
+
+Thumbnail URL
+
+Duration
+
+Owner ID (from JWT middleware)
+
+Returns success response with created video
+
+Validation Covered:
+
+Video file required
+
+Thumbnail required
+
+Cloudinary upload failure handling
+
+2️⃣ Get Video by ID (getVideobyId)
+
+Purpose: Fetch single video details with owner info.
+
+Key Logic:
+
+Validates MongoDB ObjectId
+
+Uses aggregation pipeline
+
+Matches video by ID
+
+Joins owner data from users collection
+
+Projects only required fields (username, email, avatar)
+
+Returns formatted video object
+
+3️⃣ Update Video (updateVideo)
+
+Purpose: Update title, description, or thumbnail.
+
+Key Logic:
+
+Validates video ID
+
+Confirms ownership (only uploader can edit)
+
+Optional thumbnail update:
+
+Upload new thumbnail
+
+Delete old thumbnail from Cloudinary
+
+Partial update using $set
+
+4️⃣ Delete Video (deleteVideo)
+
+Purpose: Remove a video and its media files.
+
+Key Logic:
+
+Validates video ID
+
+Ownership verification
+
+Deletes:
+
+Video file from Cloudinary
+
+Thumbnail from Cloudinary
+
+Video document from database
+
+5️⃣ Get All Videos (getAllVideos)
+
+Purpose: Fetch paginated video list with filters.
+
+Filters Implemented:
+
+Search by title/description (regex)
+
+Filter by user ID
+
+Only published videos
+
+Enhancements:
+
+Sorting (dynamic field + asc/desc)
+
+Aggregation join with owner info
+
+Pagination via aggregatePaginate
+
+6️⃣ Toggle Publish Status (toggleVideoPublishStatus)
+
+Purpose: Switch video between published/unpublished.
+
+Key Logic:
+
+Ownership verification
+
+Flips isPublished boolean
+
+Saves updated status
+
+🔒 Security Implemented
+
+JWT-based user authentication assumed
+
+Ownership checks before update/delete/publish toggle
+
+ObjectId validation to prevent malformed queries
+
+📦 External Services Used
+
+Cloudinary for video & image hosting
+
+MongoDB Aggregation for advanced queries
+
+⚠️ Pending Work
+Task	Status
+Route testing via Postman	⏳ Pending
+Cloudinary deletion utility verification	⏳ Pending
+Edge case testing (large files, invalid formats)	⏳ Pending
+Auth middleware integration testing	⏳ Pending
+API documentation	⏳ Pending
+🧠 Notes
+
+Controller structure follows consistent asyncHandler + ApiError + ApiResponse pattern
+
+Aggregation pipelines used for efficient joins instead of multiple queries
+
+File cleanup logic added to prevent orphaned Cloudinary files
 
