@@ -8,22 +8,28 @@ import mongoose from "mongoose";
 import { Video } from "../models/video.model.js";
 
 
-const PublishAddVideo = asyncHandler(async (req, res,next) => {
+const  publishAVideo= asyncHandler(async (req, res,next) => {
     const {title, description} = req.body;
+    console.log("BODY:", req.body);
+console.log("FILES:", req.files);
+
     
-    const videoFileLocalPath = req.file ? req.file.path : null;
-    const thumbnailLocalPath = req.thumbnail ? req.thumbnail.path : null;
-    
+    const videoFileLocalPath = req.files?.videoFile?.[0]?.path;
+    const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path;
 
     if(!videoFileLocalPath||!thumbnailLocalPath){ 
         return next(new Apierr("Video and thumbnail are required", 400));
     }
 
-    const videoUploadResponse = await uploadOnCloudinary(videoFileLocalPath);
+  console.log("Uploading video to Cloudinary...");
+const videoUploadResponse = await uploadOnCloudinary(videoFileLocalPath);
+console.log("Video upload done");
     if(!videoUploadResponse){
         return next(new Apierr("Video upload failed", 500));
     }   
-    const thumbnailUploadResponse = await uploadOnCloudinary(thumbnailLocalPath);
+    console.log("Uploading thumbnail...");
+const thumbnailUploadResponse = await uploadOnCloudinary(thumbnailLocalPath);
+console.log("Thumbnail upload done");
     if(!thumbnailUploadResponse){
         return next(new Apierr("Thumbnail upload failed", 500));
     }   
@@ -35,7 +41,7 @@ const PublishAddVideo = asyncHandler(async (req, res,next) => {
         duration: videoUploadResponse.duration,
         owner: req.user._id
     });
-    return new Apiresponse("Video published successfully", 201, newVideo).send(res);
+    return new Apiresponse("Video published successfully", 201, newVideo);
 
 
 })
@@ -237,11 +243,12 @@ const toggleVideoPublishStatus = asyncHandler(async (req, res, next) => {
 
 
 export {
-    PublishAddVideo,
+    publishAVideo,
     getVideobyId,   
     toggleVideoPublishStatus,
     updateVideo,
-    deleteVideo
+    deleteVideo,
+    getAllVideos
 
 
 
