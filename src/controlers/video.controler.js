@@ -6,12 +6,12 @@ import Apiresponse from "../utils/apires.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { Video } from "../models/video.model.js";
-
+// todo: how user get history of watched videos
 
 const  publishAVideo= asyncHandler(async (req, res,next) => {
     const {title, description} = req.body;
-    console.log("BODY:", req.body);
-console.log("FILES:", req.files);
+   
+
 
     
     const videoFileLocalPath = req.files?.videoFile?.[0]?.path;
@@ -21,15 +21,16 @@ console.log("FILES:", req.files);
         return next(new Apierr("Video and thumbnail are required", 400));
     }
 
-  console.log("Uploading video to Cloudinary...");
+  
 const videoUploadResponse = await uploadOnCloudinary(videoFileLocalPath);
-console.log("Video upload done");
+
     if(!videoUploadResponse){
         return next(new Apierr("Video upload failed", 500));
     }   
-    console.log("Uploading thumbnail...");
+   
+    console.log(videoUploadResponse);
 const thumbnailUploadResponse = await uploadOnCloudinary(thumbnailLocalPath);
-console.log("Thumbnail upload done");
+
     if(!thumbnailUploadResponse){
         return next(new Apierr("Thumbnail upload failed", 500));
     }   
@@ -38,7 +39,7 @@ console.log("Thumbnail upload done");
         thumbnail: thumbnailUploadResponse.secure_url,
         title,
         description,
-        duration: videoUploadResponse.duration,
+        duration: videoUploadResponse.duration||0,
         owner: req.user._id
     });
     return new Apiresponse("Video published successfully", 201, newVideo);
