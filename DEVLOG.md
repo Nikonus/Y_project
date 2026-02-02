@@ -972,3 +972,131 @@ asyncHandler + ApiError + ApiResponse
 Aggregation pipelines used instead of multiple queries for performance
 
 File cleanup logic ensures no unused Cloudinary assets remain
+
+📅 DEVLOG — 02/02/2026
+
+⏰ Time Spent: 22:00 hrs
+📌 Module: Comment Controller & Routes
+
+🚀 Overview
+
+Completed the backend implementation for the Comment system, covering creation, retrieval, updating, and deletion of comments with proper validation, pagination, aggregation, and authorization.
+
+This module is now structured for scalable discussion handling under videos.
+
+🧠 Features Implemented
+1️⃣ Get Comments for a Video (Paginated + Aggregated)
+
+Built an aggregation pipeline to fetch comments belonging to a specific video along with commenter details.
+
+🔧 Key Logic
+
+Validated video_id
+
+Used MongoDB aggregation pipeline:
+
+$match → filter comments by video
+
+$lookup → join user (commenter) data
+
+$project → return only safe user fields
+
+$unwind → flatten joined user array
+
+$sort → newest comments first
+
+Integrated aggregate pagination plugin
+
+📦 Returned Data Includes
+
+Comment content
+
+Comment creation time
+
+Commenter:
+
+username
+
+avatar
+
+fullname
+
+2️⃣ Add Comment
+
+Implemented endpoint to allow authenticated users to post comments.
+
+🔧 Validation
+
+Checked valid video_id
+
+Prevented empty or whitespace-only comments
+
+🧩 Data Stored
+
+Video reference
+
+Logged-in user ID (req.user._id)
+
+Trimmed comment content
+
+3️⃣ Update Comment (Secure & Atomic)
+
+Implemented owner-only comment editing using a single atomic query.
+
+🔒 Security Approach
+
+Instead of:
+
+Fetch → Check owner → Update (2 DB calls)
+
+Used:
+
+findOneAndUpdate({ _id: comment_id, commenter: req.user._id })
+
+
+This ensures:
+
+Only the comment owner can update
+
+No race condition window
+
+Fewer database operations
+
+4️⃣ Delete Comment (Owner-Only)
+
+Added secure deletion logic with ownership verification.
+
+🔒 Steps
+
+Validate comment ID
+
+Fetch comment
+
+Check if requester is owner
+
+Delete comment
+
+🛡 Security & Best Practices Applied
+Practice	Purpose
+ObjectId validation	Prevent DB crashes
+Ownership verification	Prevent unauthorized edits/deletes
+Trimmed input	Clean stored data
+Field projection in lookup	Prevent user data leaks
+Pagination	Performance at scale
+Atomic update queries	Efficiency + safety
+🔗 Routes Connected
+Method	Route	Description
+GET	/videos/:video_id/comments	Fetch paginated comments
+POST	/videos/:video_id/comments	Add a comment
+PATCH	/comments/:comment_id	Update a comment
+DELETE	/comments/:comment_id	Delete a comment
+📈 Outcome
+
+The Comment backend module is now fully functional, optimized, and secure.
+Ready for frontend integration and future upgrades like:
+
+Comment likes/dislikes
+
+Nested replies
+
+Real-time comment updates
