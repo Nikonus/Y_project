@@ -1,19 +1,19 @@
 import { Router } from "express";
-import { 
-    publishAVideo, 
-    getVideobyId, 
-    updateVideo, 
-    deleteVideo, 
-    getAllVideos, 
-    toggleVideoPublishStatus 
-} from "../controlers/video.controler.js"; // Teri spelling 'controler' hi rakhi hai
-import { veryfyJWT } from "../middilewares/Auth.middileware.js"; // Teri spelling 'middilewares' aur 'veryfyJWT'
-import { upload } from "../middilewares/multer.middileware.js";
+import {
+    publishAVideo,
+    getVideobyId,
+    updateVideo,
+    deleteVideo,
+    getAllVideos,
+    toggleVideoPublishStatus
+} from "../controllers/video.controller.js";
+import { verifyJWT } from "../middlewares/Auth.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
 
 // Saare routes ko protect kar dete hain
-router.use(veryfyJWT); 
+router.use(verifyJWT);
 
 // http://localhost:8000/api/v1/videos/
 router.route("/")

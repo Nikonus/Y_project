@@ -3,7 +3,7 @@ import { Apierr } from "../utils/apierr.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
-export const veryfyJWT = asyncHandler(async (req, _, next) => {
+export const verifyJWT = asyncHandler(async (req, _, next) => {
 
     const token =
         req.cookies?.accessToken ||
@@ -30,4 +30,4 @@ export const veryfyJWT = asyncHandler(async (req, _, next) => {
     next();
 });
 
-    
+

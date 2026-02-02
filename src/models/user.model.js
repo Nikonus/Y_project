@@ -1,18 +1,18 @@
-import mongoose,{ Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 
 
 const userSchema = new Schema({
-    username: { type: String, required: true , unique: true , localStorage:true , trim:true , index:true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true  },
-    fullname: { type: String, required: true , trim:true, index:true },
-    avatar: { type: String , required: true},
-    coverImage: { type: String , required: false },
-    watchhistory: { type: mongoose.Types.ObjectId, ref: "Video" },
-    password: { type: String, required: [true, "Password is required"]},
-    refreshToken: { type: String },
-    createdAt: { type: Date, default: Date.now }
+  username: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  fullname: { type: String, required: true, trim: true, index: true },
+  avatar: { type: String, required: false, default: "https://res.cloudinary.com/demo/image/upload/avatar-placeholder.png" },
+  coverImage: { type: String, required: false },
+  watchHistory: [{ type: Schema.Types.ObjectId, ref: "Video" }],
+  password: { type: String, required: [true, "Password is required"] },
+  refreshToken: { type: String },
+  createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 userSchema.pre("save", async function () {
@@ -20,31 +20,26 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-
-
-
-
-
-
-userSchema.methods.ispasswordmatched = async function (enteredpassword) {
-    return await bcrypt.compare(enteredpassword, this.password);
+userSchema.methods.isPasswordMatched = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.methods.generateAccessToken= function(){
-    return jwt.sign(
-        {
-            _id:this._id,
-            email:this.email,
-            username:this.username,
-            fullname:this.fullname
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn:process.env.ACCESS_TOKEN_EXPIRY,
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      username: this.username,
+      fullname: this.fullname
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
 
-        }
-       )
+    }
+  )
 }
+
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     { _id: this._id },
