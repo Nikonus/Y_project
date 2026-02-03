@@ -1216,3 +1216,97 @@ GET	/users/me/subscriptions	Get subscribed channels
 ✅ Routes Connected
 
 Backend now supports core social engagement features similar to modern video/social platforms.
+
+
+📅 DEVLOG — 03/02/2026
+
+⏰ Time Spent: 22:30 hrs
+📌 Modules Covered: App Routing, Like Controller Update, Dashboard, Healthcheck, Playlist System
+
+🚀 Overview
+
+Today’s work focused on expanding the backend with system-level routes, playlist management, and dashboard functionality, along with refining the Like controller. All new routes were successfully mounted in the main app configuration, improving overall project structure and modularity.
+
+The backend is now moving beyond core features into platform-level infrastructure, similar to production-grade APIs.
+
+🔧 Work Completed
+🔁 App Configuration Update (src/app.js)
+
+Integrated newly created route modules into the Express application
+
+Improved route organization for scalability
+
+Ensured middleware flow remains consistent after expansion
+
+❤️ Like Controller Enhancements
+
+Refined like-related logic and route connections
+
+Ensured compatibility with new routing structure
+
+Maintained performance-optimized stats fetching
+
+📊 Dashboard Controller & Routes
+
+Created dashboard controller to serve aggregated or overview data
+
+Added dedicated dashboard routes
+
+Designed to support future analytics like totals, user activity summaries, etc.
+
+💓 Healthcheck Endpoint
+
+Implemented system healthcheck controller
+
+Added route to verify server status
+
+Useful for uptime monitoring and deployment verification
+
+📁 Playlist Feature Added
+Playlist Model
+
+Designed scalable playlist schema
+
+Linked playlists to users and videos
+
+Included visibility control (isPublic)
+
+Enabled timestamps for tracking creation and updates
+
+Playlist Controller
+
+Added logic to manage playlists
+
+Structured for future features like add/remove video
+
+Playlist Routes
+
+Connected playlist operations via dedicated route module
+
+🛡 Best Practices Applied
+Practice	Purpose
+Modular route structure	Cleaner scaling
+Indexed references	Faster DB queries
+Separate controllers per feature	Maintainability
+Healthcheck endpoint	Production readiness
+Schema normalization	Prevent document bloat
+🔗 Routes Now Active
+Feature	Route Module
+Likes	like.routes.js
+Subscriptions	subscription.routes.js
+Dashboard	Dashboard.routes.js
+Healthcheck	healthcheck.routes.js
+Playlists	playlist.routes.js
+🏁 Status
+
+✅ App routing fully organized
+✅ Like controller updated
+✅ Dashboard module added
+✅ Healthcheck system ready
+✅ Playlist feature initialized
+
+Backend is now structured like a real production API, with core features and system endpoints in place.
+
+🔜 Next Target
+
+Playlist video management, dashboard analytics logic, and feed/timeline features
