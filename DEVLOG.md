@@ -1100,3 +1100,119 @@ Comment likes/dislikes
 Nested replies
 
 Real-time comment updates
+📅 DEVLOG — 03/02/2026
+
+⏰ Time Spent: 12:57 hrs
+📌 Module: Like System & Subscription System (Controllers + Routes)
+
+🚀 Overview
+
+Today I completed the backend implementation for the Like and Subscription features, along with their respective routes. These systems now support full interaction logic, aggregation-based data retrieval, and production-level validation and authorization.
+
+Both modules are designed with scalability, performance, and real-world backend practices in mind.
+
+❤️ Like System Completed
+1️⃣ Toggle Video Like
+
+Implemented like/unlike toggle logic
+
+Validated video_id
+
+Ensured a user can like a video only once
+
+Deletes like if it already exists (unlike)
+
+Creates like if it does not exist
+
+2️⃣ Video Like Stats
+
+Returns:
+
+Total like count
+
+Whether current user liked the video
+
+Optimized using parallel queries (Promise.all)
+
+Avoided heavy aggregation for simple counting
+
+3️⃣ Get Liked Videos
+
+Fetches all videos liked by the logged-in user
+
+Used aggregation pipeline
+
+Joined:
+
+Video details
+
+Video owner details (username, fullname, avatar)
+
+Sorted by recently liked
+
+🔔 Subscription System Completed
+1️⃣ Toggle Subscription
+
+Validated channel_id
+
+Prevented self-subscription
+
+Toggle logic:
+
+If subscription exists → remove (unsubscribe)
+
+If not → create (subscribe)
+
+Updated subscribersCount on the channel using $inc (industry optimization)
+
+2️⃣ Get Channel Subscribers
+
+Aggregation pipeline to fetch all subscribers of a channel
+
+Joined subscriber profile details:
+
+username
+
+fullname
+
+avatar
+
+Added advanced field:
+
+isSubscribedBack (checks if channel owner also follows the subscriber)
+
+3️⃣ Get Subscribed Channels
+
+Fetches all channels the logged-in user has subscribed to
+
+Joined channel profile details
+
+Included subscribersCount for each channel
+
+🛡 Best Practices Applied
+Practice	Purpose
+ObjectId validation	Prevent invalid DB queries
+Ownership checks	Secure user actions
+Aggregation pipelines	Efficient multi-collection data fetching
+Field projection	Prevent data leaks
+Parallel queries	Performance optimization
+$inc counters	Avoid expensive count queries
+Proper indexing strategy	Scalable database performance
+🔗 Routes Integrated
+Like Routes
+Method	Route	Description
+POST	/videos/:video_id/like	Toggle like
+GET	/videos/:video_id/likes	Get like stats
+GET	/users/me/liked-videos	Get liked videos
+Subscription Routes
+Method	Route	Description
+POST	/channels/:channel_id/subscribe	Toggle subscription
+GET	/channels/:channel_id/subscribers	Get channel subscribers
+GET	/users/me/subscriptions	Get subscribed channels
+🏁 Status
+
+✅ Like System Complete
+✅ Subscription System Complete
+✅ Routes Connected
+
+Backend now supports core social engagement features similar to modern video/social platforms.
