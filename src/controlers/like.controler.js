@@ -1,6 +1,5 @@
 import {asyncHandler} from "../utils/asynchandler.js";
 import { Apierr } from "../utils/apierr.js";
-import { Comment } from "../models/comments.model.js";
 import Apiresponse from "../utils/apires.js";
 import mongoose, { Aggregate } from "mongoose";
 import { Like } from "../models/like.model.js";
