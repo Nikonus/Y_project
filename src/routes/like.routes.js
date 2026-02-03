@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { toggleVideoLike, VideoLikeStats, getLikedVideos, toggleCommentLike, toggleTweetLike } from "../controlers/like.controler.js";
-import { verifyJWT } from "../middilewares/Auth.middileware.js"; 
+import { veryfyJWT } from "../middilewares/Auth.middileware.js";
 const router = Router();
 
 
-router.use(verifyJWT); 
+router.use(veryfyJWT); 
 
 // Route: /api/v1/likes/toggle/v/:video_id
 router.route("/toggle/v/:video_id").post(toggleVideoLike); //
