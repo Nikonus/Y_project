@@ -3,6 +3,7 @@ import { Apierr } from "../utils/apierr.js";
 import Apiresponse from "../utils/apires.js";
 import mongoose, { Aggregate } from "mongoose";
 import { Playlist } from "../models/playlist.model.js";
+import { Video } from "../models/video.model.js";
 
 const createPlaylist = asyncHandler(async (req, res, next) => {
     const {name, description} = req.body;
@@ -32,6 +33,11 @@ const addVideoToPlaylist = asyncHandler(async (req, res, next) => {
     if (!mongoose.isValidObjectId(playlist_id) || !mongoose.isValidObjectId(video_id)) {
         return next(new Apierr("Invalid IDs provided", 400));
     }
+    const videoExists = await Video.exists({ _id: video_id });
+    if (!videoExists) {
+        return next(new Apierr("Video not found", 404));
+    }
+
 
     const updatedPlaylist = await Playlist.findOneAndUpdate(
         { 
@@ -43,6 +49,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res, next) => {
         },
         { new: true }
     );
+
 
     if (!updatedPlaylist) {
         
@@ -86,7 +93,11 @@ const getPlayListById = asyncHandler(async (req, res, next) => {
 
     const playlistResult = await Playlist.aggregate([
         {
-             $match: {_id: new mongoose.Types.ObjectId(playlist_id)}    
+            $match: {
+                     _id: new mongoose.Types.ObjectId(playlist_id),
+                    owner: new mongoose.Types.ObjectId(req.user._id)
+}
+   
         },
         {
             $lookup: {
@@ -143,7 +154,7 @@ const getPlayListById = asyncHandler(async (req, res, next) => {
 });
 
 const getUserplaylists = asyncHandler(async (req, res, next) => {
-    const user_id = req.params.user._id;   
+    const {user_id} = req.params;   
     if(!mongoose.isValidObjectId(user_id)){
         return next(new Apierr("Invalid user ID", 400));
     }
@@ -182,27 +193,45 @@ const getUserplaylists = asyncHandler(async (req, res, next) => {
 });
 
 const updatePlaylist = asyncHandler(async (req, res, next) => {
-    const {playlist_id} = req.params;
-    const {name, description} = req.body;
-    if(!mongoose.isValidObjectId(playlist_id)){
+    const { playlist_id } = req.params;
+    const { name, description } = req.body;
+
+    if (!mongoose.isValidObjectId(playlist_id)) {
         return next(new Apierr("Invalid playlist ID", 400));
     }
-    if(name && name.trim() === ""){
+
+    if (name && name.trim() === "") {
         return next(new Apierr("Playlist name cannot be empty", 400));
     }
-    if(description && description.trim() === ""){
+
+    if (description && description.trim() === "") {
         return next(new Apierr("Playlist description cannot be empty", 400));
     }
-   const updatedPlaylist = await Playlist.findOneAndUpdate(
+
+    // ✅ FIX: Build update object
+    const updateFields = {};
+    if (name) updateFields.name = name.trim();
+    if (description) updateFields.description = description.trim();
+
+    if (Object.keys(updateFields).length === 0) {
+        return next(new Apierr("No fields provided to update", 400));
+    }
+
+    const updatedPlaylist = await Playlist.findOneAndUpdate(
         { _id: playlist_id, owner: req.user._id },
         { $set: updateFields },
         { new: true }
     );
-    if(!updatedPlaylist){
+
+    if (!updatedPlaylist) {
         return next(new Apierr("Playlist not found or you're not authorized", 404));
     }
-    return res.status(200).json(new Apiresponse(200, updatedPlaylist, "Playlist updated successfully"));
+
+    return res
+        .status(200)
+        .json(new Apiresponse(200, updatedPlaylist, "Playlist updated successfully"));
 });
+
 
 
 const deletePlaylist = asyncHandler(async (req, res, next) => {
