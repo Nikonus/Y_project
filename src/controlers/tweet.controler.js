@@ -14,7 +14,7 @@ const createTweet = asyncHandler(async (req, res, next) => {
         return next(new Apierr("Tweet content cannot be empty", 400));
     }
     const newTweet = await Tweet.create({
-        content,
+        content: content.trim(),
         owner: req.user._id
     });
     return res.status(201).json(new Apiresponse(201, newTweet, "Tweet created successfully"));
@@ -78,7 +78,7 @@ const getUserTweets = asyncHandler(async (req, res, next) => {
     if (!mongoose.isValidObjectId(user_id)) {
         return next(new Apierr("Invalid user ID", 400));
     }
-    const tweets = Tweet.aggregate([
+    const tweets = await Tweet.aggregate([
         {
             $match: {   
                 owner: new mongoose.Types.ObjectId(user_id)
