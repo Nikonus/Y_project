@@ -1,119 +1,109 @@
 <div align="center">
 🚀 Y_PROJECT
-🔐 Production-Grade Backend with JWT, Secure Cookies & Cloudinary
+🔐 Production-Grade Backend Architecture
 
-Secure • Scalable • API-First • Real-World Architecture
+Secure • Scalable • API-First • Cloud-Ready
 
-<img src="https://img.shields.io/badge/Backend-Node.js-green?style=for-the-badge&logo=node.js" /> <img src="https://img.shields.io/badge/Framework-Express-black?style=for-the-badge&logo=express" /> <img src="https://img.shields.io/badge/Database-MongoDB-darkgreen?style=for-the-badge&logo=mongodb" /> <br/> <img src="https://img.shields.io/badge/Auth-JWT-orange?style=for-the-badge" /> <img src="https://img.shields.io/badge/Security-HTTP%20Only%20Cookies-blue?style=for-the-badge" /> <img src="https://img.shields.io/badge/Storage-Cloudinary-purple?style=for-the-badge" /> </div>
+<br/> <img src="https://img.shields.io/badge/Backend-Node.js-339933?style=for-the-badge&logo=node.js" /> <img src="https://img.shields.io/badge/Framework-Express-000000?style=for-the-badge&logo=express" /> <img src="https://img.shields.io/badge/Database-MongoDB-47A248?style=for-the-badge&logo=mongodb" /> <br/> <img src="https://img.shields.io/badge/Auth-JWT-orange?style=for-the-badge" /> <img src="https://img.shields.io/badge/Security-HTTP--Only%20Cookies-blue?style=for-the-badge" /> <img src="https://img.shields.io/badge/Storage-Cloudinary-purple?style=for-the-badge" /> </div>
+✨ Project Overview
 
+Y_PROJECT is a production-oriented backend system designed using Node.js, Express, MongoDB, and JWT authentication.
 
-✨ Overview
+This project is built with a real-world SaaS backend mindset — focusing on:
 
-Y_PROJECT is a production-oriented backend system built using Node.js, Express, MongoDB, and JWT-based authentication.
+🔒 Security-first design
 
-The goal of this project is to replicate real SaaS backend architecture, focusing on security, scalability, and maintainability, rather than tutorial-level implementations.
+⚙️ Scalable architecture
 
-It supports:
+🧩 Maintainable code structure
 
-🔑 Secure user authentication
+🧠 Industry-level patterns (not tutorial code)
 
-🔄 Access & Refresh token lifecycle
+It simulates the backend of a media-driven platform where users can authenticate, upload media, and interact with protected resources.
 
-🍪 HTTP-only cookie-based sessions
+🧱 Monorepo Structure
+Y_PROJECT
+├── BACKEND   → Node.js + Express API server
+└── FRONTEND  → (React app – in progress)
 
-🖼️ Media uploads via Cloudinary
-
-🛡️ Protected APIs with middleware
-
-This project follows patterns used in real-world systems, similar to those used by large-scale platforms.
-
-
-📂 Folder Structure
-Y_PROJECT/
+📂 Backend Structure
+BACKEND/
 │
 ├── src/
-│   ├── controllers/     # Business logic (auth, user, profile)
+│   ├── controllers/     # Business logic
 │   ├── routes/          # API route definitions
-│   ├── middlewares/     # Auth, multer, security middlewares
+│   ├── middlewares/     # Auth, Multer, security layers
 │   ├── models/          # MongoDB schemas
-│   ├── utils/           # Cloudinary, tokens, async handlers
-│   ├── db/              # Database connection
-│   ├── app.js           # Express app configuration
+│   ├── utils/           # Cloudinary, tokens, helpers
+│   ├── db/              # Database connection setup
+│   ├── app.js           # Express configuration
 │   └── index.js         # Server entry point
 │
-└── public/temp          # Temporary upload storage
+└── public/temp          # Temporary file storage
 
 Why this structure?
 
- Clear separation of concerns
+✔ Clear separation of concerns
+✔ Easy to scale features
+✔ Team-friendly organization
+✔ Matches real production backend layouts
 
- Easy to scale and maintain
+🔐 Authentication System
 
- Suitable for team-based development
-
- 🔐 Authentication System
-
-Y_PROJECT implements a dual-token authentication strategy.
+Y_PROJECT uses a dual-token authentication strategy used in modern production systems.
 
 Token	Purpose
-Access Token	Used on every protected API request (short-lived)
-Refresh Token	Used to issue new access tokens (long-lived)
-Token Storage
+Access Token	Short-lived, used for protected requests
+Refresh Token	Long-lived, used to issue new access tokens
+🍪 Token Storage
 
-Stored in HTTP-only secure cookies
+Tokens are stored in HTTP-only secure cookies
 
-Not accessible via JavaScript
-
-Resistant to XSS and token theft
+✔ Not accessible via JavaScript
+✔ Protected from XSS attacks
+✔ Reduces token theft risk
 
 🔄 Authentication Flow
 🟢 Login
 
-User submits email/username and password
+User submits credentials
 
-Server validates credentials
+Server verifies password
 
-Generates access & refresh tokens
+Access + Refresh tokens generated
 
-Stores both tokens in secure cookies
+Tokens stored in secure cookies
 
 🔵 Protected Requests
 
-Browser automatically sends cookies
+Cookies automatically sent by browser
 
-JWT middleware validates access token
+JWT middleware validates token
 
-User data is attached to req.user
+User info attached to req.user
 
-Protected resource is returned
+API returns protected resource
 
 🔴 Logout
 
-User hits logout endpoint
+Refresh token removed from database
 
-Refresh token is removed from database
+Cookies cleared
 
-Cookies are cleared
+Session fully invalidated
 
-Session is fully terminated
+🛡️ Security Practices Implemented
 
-🛡️ Security Features
+✔ Password hashing
+✔ JWT signature verification
+✔ Token expiration handling
+✔ Refresh token rotation
+✔ HTTP-only secure cookies
+✔ Refresh tokens stored in MongoDB
 
-Password hashing
+These match real production security standards.
 
-JWT signature verification
-
-Token expiry handling
-
-Refresh token rotation
-
-HTTP-only secure cookies
-
-Refresh tokens stored in MongoDB
-
-These practices reflect real production security standards.
-
-📤 File Upload System
+📤 File Upload & Media Handling
 
 Supported uploads:
 
@@ -121,32 +111,48 @@ User avatar
 
 User cover image
 
+Media files (videos/images)
+
 Upload Flow
 
-Multer processes incoming file
+Multer receives file
 
-File is uploaded to Cloudinary
+File uploaded to Cloudinary
 
-Temporary local file is removed
+Temporary file deleted locally
 
-Cloudinary URL is stored in MongoDB
+Cloudinary URL saved in MongoDB
 
-Benefits:
+Benefits
 
-Reduced server storage load
+🚀 Reduced server storage load
+⚡ Faster media delivery
+📈 Horizontally scalable storage
 
-Faster media delivery
+⚙️ Tech Stack
+Layer	Technology
+Backend	Node.js, Express
+Database	MongoDB, Mongoose
+Auth	JWT (Access + Refresh)
+Security	HTTP-Only Cookies
+Storage	Cloudinary
+Dev Tools	Nodemon, Prettier
+🧪 How to Run Locally
+Backend
+cd BACKEND
+npm install
+npm run dev
 
-Scalable file handling
+
+Server runs on:
+
+http://localhost:8000
 
 👨‍💻 Developer
 
 Nikhil Dubey
-Backend Developer
-
-Focused on building secure, scalable, production-grade systems step by step.
-
+Backend Developer focused on building secure, scalable, production-grade systems step by step.
 
 <div align="center">
-⭐ If you find this project useful, consider starring the repository
+⭐ If you find this project helpful, consider starring the repository
 </div>
