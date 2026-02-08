@@ -1,4 +1,3 @@
-
 import {asyncHandler} from "../utils/asynchandler.js";
 import { Apierr } from "../utils/apierr.js";
 import {User} from "../models/user.model.js"
@@ -269,7 +268,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 })
 
-const changecurrentuserpassword = asyncHandler(async (req, res) => {
+const changeCurrentuserPassword= asyncHandler(async (req, res) => {
 
     const { oldpassword, newpassword } = req.body
 
@@ -307,7 +306,7 @@ const getCurrentuser = asyncHandler(async (req, res) => {
         )
 });
 
-const updatrAccountDetails = asyncHandler(async (req, res) => {
+const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullname, email } = req.body;
     if(!fullname||!email){
         throw new Apierr(400,"fullname and email are required") 
@@ -520,8 +519,8 @@ export { registerUser
         ,loginUser
         ,logoutUser
         ,refreshAccessToken
-        ,changecurrentuserpassword
-        ,updatrAccountDetails
+        ,changeCurrentuserPassword
+        ,updateAccountDetails
         ,updateUserAvatar
         ,updateUserCoverImage
         ,getUserChannalProfile
