@@ -26,21 +26,19 @@ export const loginUser = async ({ email, password }) => {
  */
 export const registerUser = async (data) => {
   try {
-    const res = await API.post("/users/register", data);
-
-    const { user, accessToken } = res.data.data || {};
-
-    if (accessToken) {
-      localStorage.setItem("accessToken", accessToken);
-    }
-
-    return { success: true, user };
+    const res = await API.post("/users/register", {
+      ...data,
+      avatar: "https://i.imgur.com/DefaultAvatar.png"
+    });
+    return { success: true };
   } catch (error) {
-    const message =
-      error.response?.data?.message || "Registration failed.";
-    return { success: false, message };
+    return {
+      success: false,
+      message: error.response?.data?.message || "Registration failed",
+    };
   }
 };
+
 
 /**
  * LOGOUT USER
