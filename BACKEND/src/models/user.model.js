@@ -7,9 +7,12 @@ const userSchema = new Schema({
     username: { type: String, required: true , unique: true , localStorage:true , trim:true , index:true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true  },
     fullname: { type: String, required: true , trim:true, index:true },
-    avatar: { type: String , required: true},
+    avatar: { type: String , default:""},
     coverImage: { type: String , required: false },
-    watchhistory: { type: mongoose.Types.ObjectId, ref: "Video" },
+    watchHistory: [
+  { type: mongoose.Schema.Types.ObjectId, ref: "Video" }
+],
+
     password: { type: String, required: [true, "Password is required"]},
     refreshToken: { type: String },
     createdAt: { type: Date, default: Date.now }
