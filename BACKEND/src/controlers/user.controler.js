@@ -34,81 +34,91 @@ const generateAccessTokenandRefreshToken = async (userId) => {
 };
 
     
-const registerUser= asyncHandler(async(req, res)=>{
-  
+const registerUser = asyncHandler(async (req, res) => {
+  const { fullname, username, password, email } = req.body;
 
-// console.log(req.files)
+  // 🔹 Basic validation
+  if ([fullname, username, password, email].some((f) => !f || f.trim() === "")) {
+    throw new Apierr(400, "All fields are required");
+  }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Apierr(400, "Invalid email format");
+  }
 
-    const{fullname,username,password,email}=req.body
-//     console.log("email", email)
-//     console.log("password",password)
-//     console.log("username",username)
-//     console.log("fullname", fullname)
+  // 🔹 Check existing user
+  const userExisted = await User.findOne({
+    $or: [{ username: username.toLowerCase() }, { email }],
+  });
 
+  if (userExisted) {
+    throw new Apierr(409, "User with email or username already exists");
+  }
 
-    if(
-        [fullname,username,password,email].some((field)=>field?.trim()==="")
-    ){
-        throw new Apierr(400,"All field must be required")
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // 🔹 Handle optional file uploads
+  let avatarUrl = "";
+  let coverImageUrl = "";
 
-    if(!emailRegex.test(email)){
-        throw new Apierr(400,"invalid email formate")
-    }
+  const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
-    const userexisted = await User.findOne({
-        $or:[{username},{email}]
-    })
-    if(userexisted){
-        throw new Apierr(409,"user with email or username already ecsisted")
-    }
+  if (avatarLocalPath) {
+    const avatarUpload = await uploadOnCloudinary(avatarLocalPath);
+    if (!avatarUpload) throw new Apierr(500, "Avatar upload failed");
+    avatarUrl = avatarUpload.url;
+  }
 
-    const avatarLocalpath = req.files?.avatar[0]?.path;
-    // const coverImageLocalpath = req.files?.coverImage?.[0]?.path;
-    let coverImageLocalpath;
-    if(req.files&&Array.isArray(req.files.coverImage)&&req.files.coverImage.length>0){
-        coverImageLocalpath=req.files.coverImage[0].path;
-    }
+  if (coverImageLocalPath) {
+    const coverUpload = await uploadOnCloudinary(coverImageLocalPath);
+    coverImageUrl = coverUpload?.url || "";
+  }
 
+  // 🔹 Create user
+  const user = await User.create({
+    fullname,
+    email,
+    avatar: avatarUrl,          // Optional now
+    coverImage: coverImageUrl,  // Optional
+    username: username.toLowerCase(),
+    password,
+  });
 
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
 
+  if (!createdUser) {
+    throw new Apierr(500, "Something went wrong while registering user");
+  }
 
-    if(!avatarLocalpath){
-        throw new Apierr(400, "avatar is required")
-    }
+  // 🔹 Generate tokens
+const accessToken = user.generateAccessToken();
+const refreshToken = user.generateRefreshToken();
 
-    const avatar = await uploadOnCloudinary(avatarLocalpath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalpath)
+// Save refresh token
+user.refreshToken = refreshToken;
+await user.save({ validateBeforeSave: false });
 
-        if(!avatar){
-             throw new Apierr(400, "avatar is required")
-        }
+// 🔹 Send cookies
+const options = {
+  httpOnly: true,
+  secure: false, // change to true in production
+};
 
-   const user= await User.create({
-        fullname,
-        email,
-        avatar:avatar.url,
-        coverImage:coverImage?.url||"",
-        username:username.toLowerCase(),
-        password
+return res
+  .status(201)
+  .cookie("accessToken", accessToken, options)
+  .cookie("refreshToken", refreshToken, options)
+  .json(
+    new Apiresponse(201, {
+      user: createdUser,
+      accessToken,
+      refreshToken,
+    }, "User successfully registered and logged in")
+  );
 
-    })  
-    const createUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    )  
-    if(!createUser){
-        throw new Apierr(500,"something went wrong while registering user")
-    }
-
-    return res.status(201).json(
-        new Apiresponse(200, createUser, "User sccussfully registerd ")
-    )
-
-    // console.log(req.files)
-    // console.log(req.body)
-    })
+});
 
 
 
@@ -268,7 +278,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 })
 
-const changeCurrentuserPassword= asyncHandler(async (req, res) => {
+const changecurrentuserPassword= asyncHandler(async (req, res) => {
 
     const { oldpassword, newpassword } = req.body
 
@@ -519,13 +529,13 @@ export { registerUser
         ,loginUser
         ,logoutUser
         ,refreshAccessToken
-        ,changeCurrentuserPassword
         ,updateAccountDetails
         ,updateUserAvatar
         ,updateUserCoverImage
         ,getUserChannalProfile
         ,getCurrentuser
         ,userWatchHistory
+        ,changecurrentuserPassword
         ,
         
     }    
