@@ -3,11 +3,11 @@ import {
   getUserChannalProfile,
   registerUser,
   updateUserAvatar,
-  updatrAccountDetails,
+  updateAccountDetails,
   loginUser,
   logoutUser,
   refreshAccessToken,
-  changecurrentuserpassword,
+  changecurrentuserPassword,
   getCurrentuser,
   updateUserCoverImage,
   userWatchHistory
@@ -31,10 +31,11 @@ router.post("/login", loginUser);
 router.post("/logout", veryfyJWT, logoutUser);
 router.post("/refresh-token", refreshAccessToken);
 
-router.post("/change-password", veryfyJWT, changecurrentuserpassword);
-router.post("/current-user", veryfyJWT, getCurrentuser);
+router.post("/change-password", veryfyJWT, changecurrentuserPassword);
+router.get("/me", veryfyJWT, getCurrentuser);
 
-router.patch("/update-profile", veryfyJWT, updatrAccountDetails);
+
+router.patch("/update-profile", veryfyJWT, updateAccountDetails);
 router.patch("/avatar", veryfyJWT, upload.single("avatar"), updateUserAvatar);
 router.patch("/cover-image", veryfyJWT, upload.single("coverImage"), updateUserCoverImage);
 
