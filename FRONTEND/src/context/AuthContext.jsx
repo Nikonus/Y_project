@@ -1,3 +1,4 @@
+import React from "react";
 import { createContext, useState, useEffect, useMemo } from "react";
 import {
   loginUser,
@@ -24,11 +25,26 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (credentials) => {
-    const res = await loginUser(credentials);
-    if (res.success) setUser(res.user);
-    return res;
-  };
+  const login = async ({ identifier, password }) => {
+  try {
+    const isEmail = identifier.includes("@");
+
+    const payload = isEmail
+      ? { email: identifier, password }
+      : { username: identifier, password };
+
+    const { data } = await api.post("/users/login", payload);
+
+    setUser(data.data.user);
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      message: err.response?.data?.message || "Login failed",
+    };
+  }
+};
+
 
   const logout = async () => {
     await logoutUser();
