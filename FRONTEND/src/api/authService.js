@@ -4,13 +4,19 @@ import API from "./axios";
  * LOGIN USER
  * Authenticates user and stores access token
  */
-export const loginUser = async ({ email, password }) => {
+export const loginUser = async ({ identifier, password }) => {
   try {
-    const res = await API.post("/users/login", { email, password });
+    const res = await API.post(
+      "/users/login",
+      {
+        email: identifier,
+        username: identifier,
+        password,
+      },
+      { withCredentials: true }
+    );
 
-    const { user, accessToken } = res.data.data;
-
-    localStorage.setItem("accessToken", accessToken);
+    const { user } = res.data.data;
 
     return { success: true, user };
   } catch (error) {
@@ -20,17 +26,20 @@ export const loginUser = async ({ email, password }) => {
   }
 };
 
+
 /**
  * REGISTER USER
  * Creates account and logs user in if token returned
  */
 export const registerUser = async (data) => {
   try {
-    const res = await API.post("/users/register", {
-      ...data,
-      avatar: "https://i.imgur.com/DefaultAvatar.png"
+    const res = await API.post("/users/register", data, {
+      withCredentials: true,   // 🔥 REQUIRED for cookies
     });
-    return { success: true };
+
+    const { user } = res.data.data;
+
+    return { success: true, user };
   } catch (error) {
     return {
       success: false,
@@ -38,6 +47,7 @@ export const registerUser = async (data) => {
     };
   }
 };
+
 
 
 /**
