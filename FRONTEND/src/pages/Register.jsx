@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../api/authService";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+
 
 const Register = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+
 
   const [formData, setFormData] = useState({
     fullname: "",
@@ -23,20 +28,23 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    const res = await registerUser(formData);
+  const res = await registerUser(formData);
 
-    if (res.success) {
-      navigate("/"); // Redirect to home after successful register
-    } else {
-      setError(res.message);
-    }
+  if (res.success) {
+    // 🔥 THIS LINE WAS MISSING
+    login(res.data.user);   // Save user in global auth state
 
-    setLoading(false);
-  };
+    navigate("/");          // Redirect after state updates
+  } else {
+    setError(res.message);
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4">
