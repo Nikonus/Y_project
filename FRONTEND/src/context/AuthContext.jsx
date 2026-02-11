@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async ({ identifier, password }) => {
+const login = async ({ identifier, password }) => {
   try {
     const isEmail = identifier.includes("@");
 
@@ -33,7 +33,9 @@ export const AuthProvider = ({ children }) => {
       ? { email: identifier, password }
       : { username: identifier, password };
 
-    const { data } = await api.post("/users/login", payload);
+    const { data } = await api.post("/users/login", payload, {
+      withCredentials: true,   // 🔥 THIS LINE IS REQUIRED
+    });
 
     setUser(data.data.user);
     return { success: true };
@@ -44,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     };
   }
 };
+
 
 
   const logout = async () => {
