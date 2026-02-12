@@ -17,7 +17,6 @@ import { upload } from "../middilewares/multer.middileware.js";
 import { veryfyJWT } from "../middilewares/Auth.middileware.js";
 
 const router = Router();
-
 router.post(
   "/register",
   upload.fields([
@@ -28,18 +27,21 @@ router.post(
 );
 
 router.post("/login", loginUser);
-router.post("/logout", veryfyJWT, logoutUser);
 router.post("/refresh-token", refreshAccessToken);
 
-router.post("/change-password", veryfyJWT, changecurrentuserPassword);
-router.get("/me", veryfyJWT, getCurrentuser);
+router.use(veryfyJWT);
 
 
-router.patch("/update-profile", veryfyJWT, updateAccountDetails);
-router.patch("/avatar", veryfyJWT, upload.single("avatar"), updateUserAvatar);
-router.patch("/cover-image", veryfyJWT, upload.single("coverImage"), updateUserCoverImage);
 
-router.get("/c/:username", veryfyJWT, getUserChannalProfile);
-router.get("/watch-history", veryfyJWT, userWatchHistory);
+router.post("/logout", logoutUser);
+router.post("/change-password", changecurrentuserPassword);
+
+router.get("/me", getCurrentuser);
+router.get("/c/:username", getUserChannalProfile);
+router.get("/watch-history", userWatchHistory);
+
+router.patch("/update-profile", updateAccountDetails);
+router.patch("/avatar", upload.single("avatar"), updateUserAvatar);
+router.patch("/cover-image", upload.single("coverImage"), updateUserCoverImage);
 
 export default router;
