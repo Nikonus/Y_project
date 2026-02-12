@@ -16,7 +16,10 @@ export const loginUser = async ({ identifier, password }) => {
       { withCredentials: true }
     );
 
-    const { user } = res.data.data;
+    const { user, accessToken } = res.data.data;
+
+    // 🔥 STORE TOKEN — THIS WAS MISSING
+    localStorage.setItem("accessToken", accessToken);
 
     return { success: true, user };
   } catch (error) {
