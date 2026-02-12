@@ -172,26 +172,25 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // Cookie options for security
     const options = {
-        secure: false,     // cookie will be sent only over HTTPS
-        httpOnly: true,  // cookie cannot be accessed via JavaScript
-    }
+    httpOnly: true,
+    secure: false,          // true in production (HTTPS)
+    sameSite: "lax",        // 🔥 REQUIRED for local dev
+};
 
     // Send response with cookies and user data
     return res
-        .status(200)
-        .cookie("refreshToken", tokens.refreshToken, options) // set refresh token in cookie
-        .cookie("accessToken", tokens.accessToken, options)   // set access token in cookie
-        .json(
-            new Apiresponse(
-                200,
-                {
-                    user: loggedInUser,          // user data without sensitive fields
-                    accessToken: tokens.accessToken,   // access token in response
-                    refreshToken: tokens.refreshToken, // refresh token in response
-                },
-                "User successfully logged in"
-            )
+    .status(200)
+    .cookie("refreshToken", tokens.refreshToken, options)
+    .json(
+        new Apiresponse(
+            200,
+            {
+                user: loggedInUser,
+                accessToken: tokens.accessToken, // frontend stores this
+            },
+            "User successfully logged in"
         )
+    );
         
 
 })
